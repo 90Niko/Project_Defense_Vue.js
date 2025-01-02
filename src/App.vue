@@ -8,8 +8,12 @@ export default {
     AppFooter,
   },
 };
+</script>
 
 <template>
   <AppHeader />
+  <main>
+    <router-view />
+  </main>
   <AppFooter />
-</template>;
+</template>
