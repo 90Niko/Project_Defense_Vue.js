@@ -1,13 +1,15 @@
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+import AppFooter from './components/AppFooter.vue';
+import AppHeader from './components/AppHeader.vue';
 
 export default {
   components: {
-    HelloWorld,
+    AppHeader,
+    AppFooter,
   },
 };
-</script>
 
 <template>
-  <HelloWorld />
-</template>
+  <AppHeader />
+  <AppFooter />
+</template>;
