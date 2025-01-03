@@ -63,6 +63,7 @@ nav {
 
 .login-link li {
   font-size: 1rem;
+
 }
 
 .login-link li .router-link {
