@@ -1,19 +1,19 @@
 <template>
-  <footer>
+  <footer class="app-footer">
     <p>&copy; 2021</p>
   </footer>
 </template>
 
 <style scoped>
-   footer {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      padding: 15px 0;
-      font-size: 18px;
-    }
+.app-footer {
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 15px 0;
+  font-size: 18px;
+  position: fixed; /* Makes the footer always visible at the bottom */
+  bottom: 0;
+  left: 0;
+  width: 100%; /* Ensures the footer spans the full width of the viewport */
+}
 </style>
