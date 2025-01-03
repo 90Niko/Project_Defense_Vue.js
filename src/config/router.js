@@ -5,6 +5,7 @@ import Favorite from '../pages/Favorite.vue';
 import Home from '../pages/Home.vue';
 import Login from '../pages/Login.vue';
 import NotFound from '../pages/NotFound.vue';
+import Products from '../pages/Products.vue';
 import Register from '../pages/Register.vue';
 
 const routes = [
@@ -14,6 +15,7 @@ const routes = [
   { path: '/contacts', name: 'contacts', component: Contacts },
   { path: '/login', name: 'login', component: Login },
   { path: '/register', name: 'register', component: Register },
+  { path: '/products', name: 'products', component: Products },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ];
 
