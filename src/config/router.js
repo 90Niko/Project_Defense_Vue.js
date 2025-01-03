@@ -5,7 +5,7 @@ import Favorite from '../pages/Favorite.vue';
 import Home from '../pages/Home.vue';
 import Login from '../pages/Login.vue';
 import NotFound from '../pages/NotFound.vue';
-import Register from '../pages/Register/Register.vue';
+import Register from '../pages/Register.vue';
 
 const routes = [
   { path: '/', name: 'home', component: Home },
