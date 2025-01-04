@@ -63,6 +63,9 @@ function handleLogout() {
   padding: 0.5rem 1rem;
   cursor: pointer;
 }
+.logout:hover {
+  background-color: #555;
+}
 .navbar {
   text-decoration: none;
   list-style: none;
