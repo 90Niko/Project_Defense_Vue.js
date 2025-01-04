@@ -7,6 +7,7 @@ export default {
       products: [],
       currentPage: 1,
       itemsPerPage: 4,
+      isLoading: false,
     };
   },
   computed: {
@@ -20,9 +21,11 @@ export default {
     },
   },
   async created() {
+    this.isLoading = true;
     try {
       const response = await axios.get('https://fakestoreapi.com/products');
       this.products = response.data;
+      this.isLoading = false;
     }
     catch (error) {
       console.error('Failed to fetch products:', error);
@@ -52,6 +55,7 @@ export default {
 </script>
 
 <template>
+  <progress v-if="isLoading" />
   <div class="products">
     <h1>Products</h1>
     <ul class="product-list">
