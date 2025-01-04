@@ -9,8 +9,10 @@ const password = ref('83r5^_');
 const errorMessage = ref(null);
 const authStore = useAuthStore();
 const router = useRouter();
+const isLoading = ref(false);
 
 async function handleLogin() {
+  isLoading.value = true;
   errorMessage.value = null;
   try {
     const response = await axios.post('https://fakestoreapi.com/auth/login', {
@@ -38,6 +40,7 @@ async function handleLogin() {
 </script>
 
 <template>
+  <progress v-if="isLoading" />
   <div class="login-form">
     <h2>Login</h2>
     <form @submit.prevent="handleLogin">
