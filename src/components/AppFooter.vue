@@ -1,6 +1,6 @@
 <template>
   <footer class="app-footer">
-    <p>&copy; 2021</p>
+    <p>&copy; {{ new Date().getFullYear() }}</p>
   </footer>
 </template>
 

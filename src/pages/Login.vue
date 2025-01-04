@@ -1,53 +1,70 @@
-<script>
-export default {
-  name: 'LoginForm',
-  data() {
-    return {
-      email: '',
-      password: '',
-    };
-  },
-  methods: {
-    handleLogin() {
-      // Add logic for login, e.g., API call or validation
-      if (this.email && this.password) {
-        console.log(`Logged in with email: ${this.email}`);
-      }
-      else {
-        console.error('Email and password are required');
-      }
-    },
-  },
-};
+<script setup>
+import axios from 'axios';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
+
+const username = ref('mor_2314');
+const password = ref('83r5^_');
+const errorMessage = ref(null);
+const authStore = useAuthStore();
+const router = useRouter();
+
+async function handleLogin() {
+  errorMessage.value = null;
+  try {
+    const response = await axios.post('https://fakestoreapi.com/auth/login', {
+      username: username.value,
+      password: password.value,
+    });
+
+    const data = response.data;
+
+    console.log('Login successful:', data);
+    document.cookie = `token=${data.token}; path=/; Secure`; // Securely store the token as a cookie
+    authStore.setLoggedIn(true, { name: username.value }); // Update authStore with logged-in status and user data
+    router.push({ name: 'home' }); // Redirect to the home page
+  }
+  catch (error) {
+    console.error('Error during login:', error);
+    if (error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message;
+    }
+    else {
+      errorMessage.value = 'An error occurred. Please try again later.';
+    }
+  }
+}
 </script>
 
 <template>
   <div class="login-form">
     <h2>Login</h2>
     <form @submit.prevent="handleLogin">
-      <div class="form-group">
-        <label for="email">Email:</label>
+      <div>
+        <label for="username">Username:</label>
         <input
-          id="email"
-          v-model="email"
-          type="email"
-          placeholder="Enter your email"
+          id="username"
+          v-model="username"
+          type="text"
           required
         >
       </div>
-      <div class="form-group">
+      <div>
         <label for="password">Password:</label>
         <input
           id="password"
           v-model="password"
           type="password"
-          placeholder="Enter your password"
           required
         >
       </div>
       <button type="submit">
         Login
       </button>
+      <p v-if="errorMessage" class="error">
+        {{ errorMessage }}
+      </p>
     </form>
   </div>
 </template>
@@ -57,38 +74,48 @@ export default {
   max-width: 400px;
   margin: 0 auto;
   padding: 20px;
-  border-radius: 5px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
 }
 
-.form-group {
+.login-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-form div {
   margin-bottom: 15px;
 }
 
-label {
+.login-form label {
   display: block;
   margin-bottom: 5px;
-  font-weight: bold;
 }
 
-input {
+.login-form input {
   width: 100%;
   padding: 8px;
-  margin: 4px 0 10px;
-  border: 1px solid #555;
-  border-radius: 4px;
+  box-sizing: border-box;
 }
 
-button {
+.login-form button {
   width: 100%;
   padding: 10px;
-  background-color: #555;
+  background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
 }
 
-button:hover {
-  background-color: #444;
+.login-form button:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+  text-align: center;
 }
 </style>
