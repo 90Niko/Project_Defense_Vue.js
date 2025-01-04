@@ -37,7 +37,7 @@ function handleLogout() {
         Welcome, {{ userName }}
       </li>
       <li v-if="isLoggedIn">
-        <button @click="handleLogout">
+        <button class="logout" @click="handleLogout">
           Logout
         </button>
       </li>
@@ -56,6 +56,13 @@ function handleLogout() {
 </template>
 
 <style scoped>
+.logout {
+  background-color: #333;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
 .navbar {
   text-decoration: none;
   list-style: none;
