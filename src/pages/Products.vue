@@ -55,7 +55,7 @@ export default {
 </script>
 
 <template>
-  <progress v-if="isLoading" />
+  <progress v-if="isLoading" class="loader-line" />
   <div class="products">
     <h1>Products</h1>
     <ul class="product-list">
@@ -94,6 +94,26 @@ export default {
 </template>
 
 <style>
+.loader-line {
+  width: 100%;
+  height: 3px;
+  position: relative;
+  overflow: hidden;
+  background-color: #ddd;
+  margin: 0 auto;
+  border-radius: 20px;
+}
+
+.loader-line:before {
+  content: "";
+  position: absolute;
+  left: -50%;
+  height: 3px;
+  width: 40%;
+  background-color: #212020;
+  animation: lineAnim 1s linear infinite;
+  border-radius: 20px;
+}
 .products {
   max-width: 1200px;
   margin: 0 auto;
