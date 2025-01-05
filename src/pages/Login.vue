@@ -40,7 +40,7 @@ async function handleLogin() {
 </script>
 
 <template>
-  <progress v-if="isLoading" />
+  <progress v-if="isLoading" class="loader-line" />
   <div class="login-form">
     <h2>Login</h2>
     <form @submit.prevent="handleLogin">
@@ -73,6 +73,27 @@ async function handleLogin() {
 </template>
 
 <style scoped>
+.loader-line {
+  width: 100%;
+  height: 3px;
+  position: relative;
+  overflow: hidden;
+  background-color: #ddd;
+  margin: 0 auto;
+  border-radius: 20px;
+  padding: auto;
+}
+
+.loader-line:before {
+  content: "";
+  position: absolute;
+  left: -50%;
+  height: 3px;
+  width: 40%;
+  background-color: #212020;
+  animation: lineAnim 1s linear infinite;
+  border-radius: 20px;
+}
 .login-form {
   max-width: 400px;
   margin: 0 auto;
@@ -105,7 +126,7 @@ async function handleLogin() {
 .login-form button {
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
+  background-color: #444;
   color: white;
   border: none;
   border-radius: 5px;
@@ -113,7 +134,7 @@ async function handleLogin() {
 }
 
 .login-form button:hover {
-  background-color: #0056b3;
+  background-color: #e6e6e6;
 }
 
 .error {

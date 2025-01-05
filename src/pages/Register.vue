@@ -2,41 +2,73 @@
 import useVuelidate from '@vuelidate/core';
 import { email, maxLength, minLength, numeric, required } from '@vuelidate/validators';
 import axios from 'axios';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 export default {
   setup() {
-    return {
-      v$: useVuelidate(),
+    const form = ref({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      age: null,
+    });
+
+    const submitted = ref(false);
+    const submissionError = ref(null);
+    const validationErrors = ref([]);
+    const isLoading = ref(false);
+    const router = useRouter();
+
+    const rules = {
+      firstName: { required, minLength: minLength(3), maxLength: maxLength(15) },
+      lastName: { required, minLength: minLength(3), maxLength: maxLength(15) },
+      email: { required, email },
+      phoneNumber: { required, numeric, minLength: minLength(5), maxLength: maxLength(10) },
+      age: { required, numeric },
     };
-  },
-  data() {
-    return {
-      form: {
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        age: null,
-      },
-      submitted: false,
+
+    const v$ = useVuelidate(rules, form);
+
+    const validateForm = () => {
+      v$.value.$touch();
+      validationErrors.value = [];
+
+      if (!v$.value.$invalid)
+        return true;
+
+      Object.entries(v$.value).forEach(([key, value]) => {
+        if (value && value.$error) {
+          validationErrors.value.push(`${key}: Validation failed`);
+        }
+      });
+
+      return false;
     };
-  },
-  methods: {
-    async submitForm() {
-      this.submitted = true;
-      window.scrollTo(0, 0);
-      console.log('Form Data:', this.form);
+
+    const submitForm = async () => {
+      submitted.value = false;
+      isLoading.value = true;
+      submissionError.value = null;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (!validateForm()) {
+        submitted.value = false;
+        isLoading.value = false;
+        return;
+      }
 
       try {
         const response = await axios.post(
           'https://fakestoreapi.com/users',
           {
-            email: this.form.email,
-            username: `${this.form.firstName.toLowerCase()}${this.form.lastName.toLowerCase()}`,
+            email: form.value.email,
+            username: `${form.value.firstName.toLowerCase()}${form.value.lastName.toLowerCase()}`,
             password: 'm38rmF$',
             name: {
-              firstname: this.form.firstName,
-              lastname: this.form.lastName,
+              firstname: form.value.firstName,
+              lastname: form.value.lastName,
             },
             address: {
               city: 'kilcoole',
@@ -48,7 +80,7 @@ export default {
                 long: '81.1496',
               },
             },
-            phone: this.form.phoneNumber,
+            phone: form.value.phoneNumber,
           },
           {
             headers: {
@@ -58,40 +90,42 @@ export default {
         );
 
         console.log('Server Response:', response.data);
+        submitted.value = true;
 
-        // Create a cookie with the form data
-        document.cookie = `userData=${encodeURIComponent(
-          JSON.stringify(this.form),
-        )}; path=/; max-age=3600;`;
+        // Redirect to home page after 2 seconds
+        setTimeout(() => {
+          router.push('/');
+        }, 2000);
       }
       catch (error) {
         console.error('Error submitting form:', error);
+        submissionError.value = 'There was an error submitting the form. Please try again later.';
       }
-
       finally {
-        setTimeout(() => {
-          this.submitted = false;
-          this.$router.push('/');
-        }, 3000);
+        isLoading.value = false;
       }
-    },
-  },
-  validations: {
-    form: {
-      firstName: { required, minLength: minLength(3), maxLength: maxLength(15) },
-      lastName: { required, minLength: minLength(3), maxLength: maxLength(15) },
-      email: { required, email },
-      phoneNumber: { required, numeric, minLength: minLength(5), maxLength: maxLength(10) },
-      age: { required, numeric },
-    },
+    };
+
+    return {
+      form,
+      submitted,
+      submissionError,
+      validationErrors,
+      isLoading,
+      v$,
+      submitForm,
+    };
   },
 };
 </script>
 
 <template>
-  <div v-if="submitted" class="loader-line" />
-  <div v-if="submitted" class="submission-info">
+  <div v-if="isLoading" class="loader-line" />
+  <div v-if="submitted && !submissionError" class="submission-info">
     <h3>Form Submitted Successfully!</h3>
+  </div>
+  <div v-if="submissionError" class="error-message">
+    <h3>{{ submissionError }}</h3>
   </div>
   <div class="registration-form">
     <h2>Registration Form</h2>
@@ -99,31 +133,45 @@ export default {
       <div class="form-group">
         <label for="firstName">First Name:</label>
         <input id="firstName" v-model="form.firstName" type="text" required placeholder="Enter your first name...">
+        <p v-if="v$.firstName.$error" class="error-text">
+          {{ v$.firstName.$errors[0]?.$message }}
+        </p>
       </div>
 
       <div class="form-group">
         <label for="lastName">Last Name:</label>
         <input id="lastName" v-model="form.lastName" type="text" required placeholder="Enter your last name...">
+        <p v-if="v$.lastName.$error" class="error-text">
+          {{ v$.lastName.$errors[0]?.$message }}
+        </p>
       </div>
 
       <div class="form-group">
         <label for="email">Email:</label>
         <input id="email" v-model="form.email" type="email" required placeholder="Enter your email...">
+        <p v-if="v$.email.$error" class="error-text">
+          {{ v$.email.$errors[0]?.$message }}
+        </p>
       </div>
 
       <div class="form-group">
         <label for="phoneNumber">Phone Number:</label>
         <input id="phoneNumber" v-model="form.phoneNumber" type="tel" required placeholder="Enter your phone number...">
+        <p v-if="v$.phoneNumber.$error" class="error-text">
+          {{ v$.phoneNumber.$errors[0]?.$message }}
+        </p>
       </div>
 
       <div class="form-group">
         <label for="age">Age:</label>
         <input id="age" v-model="form.age" type="number" min="0" required placeholder="Enter your age...">
+        <p v-if="v$.age.$error" class="error-text">
+          {{ v$.age.$errors[0]?.$message }}
+        </p>
       </div>
 
       <button type="submit">
         Submit
-        {{ console.log(form) }}
       </button>
     </form>
   </div>
@@ -131,45 +179,40 @@ export default {
 
 <style scoped>
 .loader-line {
-            width: 100%;
-            height: 3px;
-            position: relative;
-            overflow: hidden;
-            background-color: #ddd;
-            margin: 0 auto;
-            -webkit-border-radius: 20px;
-            -moz-border-radius: 20px;
-            border-radius: 20px;
-        }
+  width: 100%;
+  height: 3px;
+  position: relative;
+  overflow: hidden;
+  background-color: #ddd;
+  margin: 0 auto;
+  border-radius: 20px;
+}
 
-        .loader-line:before {
-            content: "";
-            position: absolute;
-            left: -50%;
-            height: 3px;
-            width: 40%;
-            background-color: #212020;
-            -webkit-animation: lineAnim 1s linear infinite;
-            -moz-animation: lineAnim 1s linear infinite;
-            animation: lineAnim 1s linear infinite;
-            -webkit-border-radius: 20px;
-            -moz-border-radius: 20px;
-            border-radius: 20px;
-        }
+.loader-line:before {
+  content: "";
+  position: absolute;
+  left: -50%;
+  height: 3px;
+  width: 40%;
+  background-color: #212020;
+  animation: lineAnim 1s linear infinite;
+  border-radius: 20px;
+}
 
-        @keyframes lineAnim {
-            0% {
-                left: -40%;
-            }
-            50% {
-                left: 20%;
-                width: 80%;
-            }
-            100% {
-                left: 100%;
-                width: 100%;
-            }
-        }
+@keyframes lineAnim {
+  0% {
+    left: -40%;
+  }
+  50% {
+    left: 20%;
+    width: 80%;
+  }
+  100% {
+    left: 100%;
+    width: 100%;
+  }
+}
+
 .registration-form {
   max-width: 400px;
   margin: 0 auto;
@@ -207,6 +250,36 @@ button:hover {
   background-color: #0056b3;
 }
 
+.error-message {
+  color: #d9534f;
+  background-color: #f2dede;
+  padding: 10px;
+  border: 1px solid #ebccd1;
+  border-radius: 5px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.error-list {
+  margin-bottom: 20px;
+  color: #d9534f;
+}
+
+.error-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.error-list li {
+  margin-bottom: 5px;
+}
+
+.error-text {
+  color: #d9534f;
+  font-size: 0.875rem;
+  margin-top: 5px;
+}
+
 .submission-info {
   margin-top: 20px;
   padding: 15px;
@@ -229,4 +302,4 @@ button:hover {
   font-size: 1.2rem;
   color: #155724;
 }
-  </style>
+</style>
