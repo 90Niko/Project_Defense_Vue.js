@@ -1,55 +1,85 @@
 <script>
+import { useFavoriteStore } from '@/stores/useFavoriteStore'; // Adjust the path based on your project structure
 import axios from 'axios';
+import { computed, onMounted, ref } from 'vue';
 
 export default {
-  data() {
-    return {
-      products: [],
-      currentPage: 1,
-      itemsPerPage: 4,
-      isLoading: false,
+  name: 'ProductList',
+  setup() {
+    // Reactive state
+    const products = ref([]);
+    const currentPage = ref(1);
+    const itemsPerPage = 4;
+    const isLoading = ref(false);
+
+    // Use Favorite Store
+    const favoriteStore = useFavoriteStore();
+
+    // Computed properties
+    const totalPages = computed(() => Math.ceil(products.value.length / itemsPerPage));
+    const paginatedProducts = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      return products.value.slice(start, end);
+    });
+
+    // Favorite functionality
+    const toggleFavorite = (product) => {
+      favoriteStore.toggleFavorite(product);
     };
-  },
-  computed: {
-    totalPages() {
-      return Math.ceil(this.products.length / this.itemsPerPage);
-    },
-    paginatedProducts() {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.products.slice(start, end);
-    },
-  },
-  async created() {
-    this.isLoading = true;
-    try {
-      const response = await axios.get('https://fakestoreapi.com/products');
-      this.products = response.data;
-      this.isLoading = false;
-    }
-    catch (error) {
-      console.error('Failed to fetch products:', error);
-    }
-  },
-  methods: {
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-        this.scrollToTop();
+
+    const isFavorite = product => favoriteStore.isFavorite(product);
+
+    // Fetch products
+    const fetchProducts = async () => {
+      isLoading.value = true;
+      try {
+        const response = await axios.get('https://fakestoreapi.com/products');
+        products.value = response.data;
       }
-    },
-    previousPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-        this.scrollToTop();
+      catch (error) {
+        console.error('Failed to fetch products:', error);
       }
-    },
-    scrollToTop() {
+      finally {
+        isLoading.value = false;
+      }
+    };
+
+    const scrollToTop = () => {
       window.scrollTo({
         top: 0,
-        behavior: 'smooth', // Smooth scrolling effect
+        behavior: 'smooth',
       });
-    },
+    };
+    // Pagination controls
+    const nextPage = () => {
+      if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+        scrollToTop();
+      }
+    };
+
+    const previousPage = () => {
+      if (currentPage.value > 1) {
+        currentPage.value--;
+        scrollToTop();
+      }
+    };
+    // Fetch products on component mount
+    onMounted(fetchProducts);
+
+    return {
+      products,
+      currentPage,
+      itemsPerPage,
+      isLoading,
+      totalPages,
+      paginatedProducts,
+      toggleFavorite,
+      isFavorite,
+      nextPage,
+      previousPage,
+    };
   },
 };
 </script>
@@ -59,10 +89,18 @@ export default {
   <div class="products">
     <h1>Products</h1>
     <ul class="product-list">
-      <li v-for="product in paginatedProducts" :key="product.id" class="product-item">
+      <li
+        v-for="product in paginatedProducts"
+        :key="product.id"
+        class="product-item"
+      >
         <article class="product-card">
           <div class="product-image-container">
-            <img :src="product.image" :alt="product.title" class="product-image">
+            <img
+              :src="product.image"
+              :alt="product.title"
+              class="product-image"
+            >
           </div>
           <div class="product-details">
             <h2 class="product-name">
@@ -73,10 +111,17 @@ export default {
             $ {{ product.price }}
           </p>
           <div class="btn">
-            <div class="btn">
-              <i class="bi bi-plus-circle" />
-              <i class="bi bi-star-fill" />
-            </div>
+            <!-- Favorite Button -->
+            <button
+              class="favorite-button"
+              :class="{ 'favorite-active': isFavorite(product) }"
+              @click="toggleFavorite(product)"
+            >
+              <i
+                :class="isFavorite(product) ? 'bi bi-star-fill' : 'bi bi-star'"
+              />
+              {{ isFavorite(product) ? 'Unfavorite' : 'Favorite' }}
+            </button>
           </div>
         </article>
       </li>
@@ -94,6 +139,25 @@ export default {
 </template>
 
 <style>
+/* Add favorite button styles */
+.favorite-button {
+  background-color: #ddd;
+  color: #333;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.favorite-button.favorite-active {
+  background-color: #ffcc00;
+  color: #fff;
+}
+
+.favorite-button i {
+  margin-right: 5px;
+}
 .loader-line {
   width: 100%;
   height: 3px;
@@ -117,14 +181,16 @@ export default {
 .products {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding-bottom: 80px;
   font-family: Arial, sans-serif;
   text-align: center;
+
 }
 
-h1 {
+h1{
   font-size: 2.5rem;
-  margin-bottom: 20px;
+  margin-bottom: 120px;
+  padding-bottom: 20px;
   color: #333;
 }
 
