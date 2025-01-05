@@ -164,7 +164,7 @@ export default {
 
       <div class="form-group">
         <label for="age">Age:</label>
-        <input id="age" v-model="form.age" type="number" min="0" required placeholder="Enter your age...">
+        <input id="age" v-model="form.age" type="text" required placeholder="Enter your age...">
         <p v-if="v$.age.$error" class="error-text">
           {{ v$.age.$errors[0]?.$message }}
         </p>
