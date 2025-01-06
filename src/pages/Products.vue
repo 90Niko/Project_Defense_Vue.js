@@ -1,4 +1,5 @@
 <script>
+import { useAuthStore } from '@/stores/auth'; // Import auth store
 import { useFavoriteStore } from '@/stores/useFavoriteStore'; // Adjust the path based on your project structure
 import axios from 'axios';
 import { computed, onMounted, ref } from 'vue';
@@ -14,6 +15,7 @@ export default {
 
     // Use Favorite Store
     const favoriteStore = useFavoriteStore();
+    const authStore = useAuthStore(); // Access auth store
 
     // Computed properties
     const totalPages = computed(() => Math.ceil(products.value.length / itemsPerPage));
@@ -25,10 +27,21 @@ export default {
 
     // Favorite functionality
     const toggleFavorite = (product) => {
-      favoriteStore.toggleFavorite(product);
+      return favoriteStore.toggleFavorite(product);
     };
 
-    const isFavorite = product => favoriteStore.isFavorite(product);
+    const isFavorite = (product) => {
+      return favoriteStore.isFavorite(product);
+    };
+
+    const removeFavorite = (product) => {
+      favoriteStore.removeFavorite(product);
+    };
+
+    const viewDetails = (product) => {
+      console.log(`Viewing details for product: ${product.title}`);
+      // Implement navigation to the product details page or modal
+    };
 
     // Fetch products
     const fetchProducts = async () => {
@@ -51,6 +64,7 @@ export default {
         behavior: 'smooth',
       });
     };
+
     // Pagination controls
     const nextPage = () => {
       if (currentPage.value < totalPages.value) {
@@ -65,6 +79,7 @@ export default {
         scrollToTop();
       }
     };
+
     // Fetch products on component mount
     onMounted(fetchProducts);
 
@@ -77,8 +92,11 @@ export default {
       paginatedProducts,
       toggleFavorite,
       isFavorite,
+      removeFavorite,
+      viewDetails,
       nextPage,
       previousPage,
+      isLoggedIn: authStore.isLoggedIn, // Reactive property for login status
     };
   },
 };
@@ -111,16 +129,25 @@ export default {
             $ {{ product.price }}
           </p>
           <div class="btn">
-            <!-- Favorite Button -->
+            <!-- Conditionally Render Buttons -->
             <button
+              v-if="isLoggedIn"
               class="favorite-button"
               :class="{ 'favorite-active': isFavorite(product) }"
-              @click="toggleFavorite(product)"
+              @click="isFavorite(product) ? removeFavorite(product) : toggleFavorite(product)"
             >
               <i
-                :class="isFavorite(product) ? 'bi bi-star-fill' : 'bi bi-star'"
+                :class="isFavorite(product) ? 'bi bi-x-circle' : 'bi bi-star'"
               />
-              {{ isFavorite(product) ? 'Unfavorite' : 'Favorite' }}
+              {{ isFavorite(product) ? 'Remove' : 'Favorite' }}
+            </button>
+            <button
+              v-else
+              class="details-button"
+              @click="viewDetails(product)"
+            >
+              <i class="bi bi-info-circle" />
+              Details
             </button>
           </div>
         </article>
@@ -139,7 +166,6 @@ export default {
 </template>
 
 <style>
-/* Add favorite button styles */
 .favorite-button {
   background-color: #ddd;
   color: #333;
@@ -323,5 +349,37 @@ h1{
   .product-list {
     grid-template-columns: 1fr; /* One item per row */
   }
+}
+.favorite-button {
+  background-color: #ddd;
+  color: #333;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.favorite-button.favorite-active {
+  background-color: #ffcc00;
+  color: #fff;
+}
+
+.details-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.details-button:hover {
+  background-color: #0056b3;
+}
+
+.favorite-button i, .details-button i {
+  margin-right: 5px;
 }
 </style>

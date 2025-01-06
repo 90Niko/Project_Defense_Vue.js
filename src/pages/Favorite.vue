@@ -1,184 +1,163 @@
 <script>
 import { useAuthStore } from '@/stores/auth';
 import { useFavoriteStore } from '@/stores/useFavoriteStore';
-import { computed, defineComponent } from 'vue';
+import { useRouter } from 'vue-router'; // Import router for navigation
 
-export default defineComponent({
-  name: 'Favorites',
-  props: {
-    items: {
-      type: Array,
-      default: () => [], // Default to empty array if no items are passed
-    },
-  },
-  setup(props) {
-    // Authentication store
-    const authStore = useAuthStore();
-
-    // Favorite store
+export default {
+  name: 'FavoritesList',
+  setup() {
     const favoriteStore = useFavoriteStore();
+    const authStore = useAuthStore();
+    const router = useRouter(); // Access the router
 
-    // Computed property for login status
-    const isLoggedIn = computed(() => authStore.isLoggedIn);
+    // Reactive favorites array
+    const favorites = favoriteStore.favorites;
 
-    // Check if an item is a favorite
-    const isFavorite = item => favoriteStore.isFavorite(item);
-
-    // Toggle favorite status
-    const toggleFavorite = (item) => {
-      if (!isLoggedIn.value) {
-        console.log('You must be logged in to manage favorites!'); // Placeholder for toast or notification
-        return;
-      }
-      favoriteStore.toggleFavorite(item);
+    // Redirect to Login page
+    const redirectToLogin = () => {
+      router.push('/login'); // Navigate to Login.vue
     };
 
-    // Redirect to login page
-    const redirectToLogin = () => {
-      window.location.href = '/login'; // Replace with router push if using Vue Router
+    // Remove a product from the favorites list
+    const removeFavorite = (product) => {
+      favoriteStore.removeFavorite(product); // Update the store
+      const index = favorites.findIndex(item => item.id === product.id);
+      if (index !== -1) {
+        favorites.splice(index, 1); // Remove the product from the local array
+      }
+    };
+
+    // Reset the isRemoved flag to false to "restore" the product
+    const resetRemovedFlag = () => {
+      favoriteStore.isRemoved = false;
     };
 
     return {
-      items: props.items,
-      isLoggedIn,
-      isFavorite,
-      toggleFavorite,
-      redirectToLogin,
+      favorites, // Reactive array
+      removeFavorite, // Method to remove a product
+      resetRemovedFlag, // Method to reset removal state
+      isLoggedIn: authStore.isLoggedIn, // Reactive property for login status
+      redirectToLogin, // Method to redirect to Login
     };
   },
-});
+};
 </script>
 
 <template>
-  <div class="favorite-container">
-    <!-- Show login message if user is not logged in -->
-    <div v-if="!isLoggedIn" class="favorite-message">
-      <h3 class="msg">
-        Log in to view and manage your favorite items.
-      </h3>
-      <button class="btn-login" @click="redirectToLogin">
+  <div>
+    <h1>Your Favorites</h1>
+    <!-- Show message and login button if the user is not logged in -->
+    <div v-if="!isLoggedIn" class="login-prompt">
+      <p class="login-message">
+        Please log in to view your favorite products.
+      </p>
+      <button class="login-button" @click="redirectToLogin">
         Log In
       </button>
     </div>
-
-    <!-- Show empty state message if there are no items -->
-    <div v-else-if="!items || items.length === 0" class="no-items-message">
-      <h3 class="msg">
-        No favorite items to display. Start exploring and add some!
-      </h3>
-    </div>
-
-    <!-- Show list of favorite items -->
-    <ul v-else class="favorites-list">
-      <li v-for="item in items" :key="item.id" class="favorite-item">
-        <div class="favorite-item-details">
-          <span class="item-name">{{ item.name }}</span>
-          <button
-            :disabled="!isLoggedIn"
-            :class="{ 'favorite-active': isFavorite(item) }"
-            :aria-pressed="isFavorite(item)"
-            :title="isFavorite(item) ? 'Unfavorite this item' : 'Add to favorites'"
-            class="btn-favorite"
-            @click="toggleFavorite(item)"
-          >
-            {{ isFavorite(item) ? 'Unfavorite' : 'Favorite' }}
-          </button>
+    <!-- Display favorite items if the user is logged in and the list is not empty -->
+    <ul v-if="isLoggedIn && favorites.length > 0" class="favorite-list">
+      <li v-for="product in favorites" :key="product.id" class="favorite-item">
+        <div class="favorite-product">
+          <img :src="product.image" :alt="product.title" class="favorite-image">
+          <div class="favorite-details">
+            <h2>{{ product.title }}</h2>
+            <p>$ {{ product.price }}</p>
+          </div>
         </div>
+        <!-- Remove Button -->
+        <button class="remove-button" @click="removeFavorite(product)">
+          Remove
+        </button>
       </li>
     </ul>
+    <!-- Show a message if there are no favorites -->
+    <p v-else-if="isLoggedIn">
+      No favorites added yet!
+    </p>
   </div>
 </template>
 
-<style scoped>
-.favorite-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+<style>
+h1 {
   text-align: center;
-}
-
-.msg {
-  color: #333;
-  font-size: 1.2rem;
   margin-bottom: 20px;
 }
-
-.favorite-message,
-.no-items-message {
-  margin-top: 50px;
+p {
+  margin: 0;
+  text-align: center;
 }
-
-.favorites-list {
+.favorite-list {
   list-style: none;
   padding: 0;
-  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Two items per row */
+  gap: 20px;
 }
 
 .favorite-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 15px;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  border-radius: 10px;
+  padding: 10px;
   background-color: #f9f9f9;
-  transition: box-shadow 0.3s;
 }
 
-.favorite-item:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.favorite-item-details {
+.favorite-product {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  width: 100%;
 }
 
-.item-name {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #333;
+.favorite-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-right: 10px;
 }
 
-.btn-login {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
+.favorite-details {
+  text-align: left;
 }
 
-.btn-login:hover {
-  background-color: #0056b3;
-}
-
-.btn-favorite {
-  background-color: #555;
+.remove-button {
+  background-color: #ff4d4d;
   color: white;
   border: none;
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s;
 }
 
-.btn-favorite.favorite-active {
-  background-color: #ffcc00;
+.remove-button:hover {
+  background-color: #e60000;
+}
+
+.login-prompt {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-message {
+  color: #ff4d4d;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.login-button {
+  background-color: #333;
   color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
 }
 
-.btn-favorite:hover:not([disabled]) {
-  background-color: #777;
-}
-
-button[disabled] {
-  cursor: not-allowed;
-  opacity: 0.6;
+.login-button:hover {
+  background-color: #555;
 }
 </style>
