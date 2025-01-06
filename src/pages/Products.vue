@@ -1,8 +1,10 @@
 <script>
 import { useAuthStore } from '@/stores/auth'; // Import auth store
-import { useFavoriteStore } from '@/stores/useFavoriteStore'; // Adjust the path based on your project structure
+import { useDetailsStore } from '@/stores/useDetailsStore'; // Details store
+import { useFavoriteStore } from '@/stores/useFavoriteStore'; // Favorite store
 import axios from 'axios';
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router'; // Import router for navigation
 
 export default {
   name: 'ProductList',
@@ -13,9 +15,11 @@ export default {
     const itemsPerPage = 4;
     const isLoading = ref(false);
 
-    // Use Favorite Store
+    // Use stores
     const favoriteStore = useFavoriteStore();
-    const authStore = useAuthStore(); // Access auth store
+    const authStore = useAuthStore();
+    const detailsStore = useDetailsStore();
+    const router = useRouter(); // Access Vue Router
 
     // Computed properties
     const totalPages = computed(() => Math.ceil(products.value.length / itemsPerPage));
@@ -38,9 +42,10 @@ export default {
       favoriteStore.removeFavorite(product);
     };
 
+    // Set product details and redirect
     const viewDetails = (product) => {
-      console.log(`Viewing details for product: ${product.title}`);
-      // Implement navigation to the product details page or modal
+      detailsStore.setProduct(product); // Set the selected product in the details store
+      router.push(`/details/${product.id}`); // Navigate to the Details page
     };
 
     // Fetch products
@@ -96,7 +101,7 @@ export default {
       viewDetails,
       nextPage,
       previousPage,
-      isLoggedIn: authStore.isLoggedIn, // Reactive property for login status
+      isLoggedIn: authStore.isLoggedIn,
     };
   },
 };
