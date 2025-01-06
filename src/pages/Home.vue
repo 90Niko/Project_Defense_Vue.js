@@ -3,9 +3,9 @@ export default {
   data() {
     return {
       images: [
-        { src: '/public/images/modell.png', alt: 'model' },
-        { src: '/public/images/discount.png', alt: 'Discount' },
-        { src: '/public/images/model.png', alt: 'Model' },
+        { src: '/images/modell.png', alt: 'model' },
+        { src: '/images/discount.png', alt: 'Discount' },
+        { src: '/images/model.png', alt: 'Model' },
       ],
       currentIndex: 0,
       intervalId: null, // Track the interval ID
