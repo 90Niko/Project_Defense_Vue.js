@@ -8,6 +8,7 @@ import Login from '../pages/Login.vue';
 import NotFound from '../pages/NotFound.vue';
 import Products from '../pages/Products.vue';
 import Register from '../pages/Register.vue';
+import Users from '../pages/Users.vue';
 
 const routes = [
   { path: '/', name: 'home', component: Home },
@@ -17,6 +18,7 @@ const routes = [
   { path: '/login', name: 'login', component: Login },
   { path: '/register', name: 'register', component: Register },
   { path: '/products', name: 'products', component: Products },
+  { path: '/users', name: 'users', component: Users },
   { path: '/details/:id', name: 'details', component: Details },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ];
