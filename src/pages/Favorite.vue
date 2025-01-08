@@ -1,5 +1,5 @@
 <script>
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useFavoriteStore } from '@/stores/useFavoriteStore';
 import { useRouter } from 'vue-router'; // Import router for navigation
 

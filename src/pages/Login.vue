@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const username = ref('mor_2314');
 const password = ref('83r5^_');

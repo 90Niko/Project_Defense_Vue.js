@@ -128,7 +128,7 @@ export default {
     <h3>{{ submissionError }}</h3>
   </div>
   <div class="registration-form">
-    <h2>Registration Form</h2>
+    <h2>Registration</h2>
     <form @submit.prevent="submitForm">
       <div class="form-group">
         <label for="firstName">First Name:</label>
@@ -178,6 +178,10 @@ export default {
 </template>
 
 <style scoped>
+h2 {
+  text-align: center;
+  margin-bottom: 10px;
+}
 .loader-line {
   width: 100%;
   height: 3px;
@@ -220,10 +224,6 @@ export default {
   border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #f9f9f9;
-}
-
-.form-group {
-  margin-bottom: 15px;
 }
 
 label {
