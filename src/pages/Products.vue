@@ -1,10 +1,10 @@
 <script>
-import { useAuthStore } from '@/stores/auth'; // Import auth store
+import { useAuthStore } from '@/stores/useAuthStore'; // Import auth store
 import { useDetailsStore } from '@/stores/useDetailsStore'; // Details store
 import { useFavoriteStore } from '@/stores/useFavoriteStore'; // Favorite store
-import axios from 'axios';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router'; // Import router for navigation
+import { fetchProducts } from '../services/productsServices';
 
 export default {
   name: 'ProductList',
@@ -31,7 +31,7 @@ export default {
 
     // Favorite functionality
     const toggleFavorite = (product) => {
-      return favoriteStore.toggleFavorite(product);
+      favoriteStore.toggleFavorite(product);
     };
 
     const isFavorite = (product) => {
@@ -49,58 +49,49 @@ export default {
     };
 
     // Fetch products
-    const fetchProducts = async () => {
+    const loadProducts = async () => {
       isLoading.value = true;
       try {
-        const response = await axios.get('https://fakestoreapi.com/products');
-        products.value = response.data;
+        const data = await fetchProducts(); // Fetch data directly
+        products.value = data; // Assign the fetched data
       }
       catch (error) {
-        console.error('Failed to fetch products:', error);
+        console.error('Error fetching products:', error);
       }
       finally {
         isLoading.value = false;
       }
     };
 
-    const scrollToTop = () => {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
-    };
-
     // Pagination controls
     const nextPage = () => {
       if (currentPage.value < totalPages.value) {
         currentPage.value++;
-        scrollToTop();
       }
     };
 
     const previousPage = () => {
       if (currentPage.value > 1) {
         currentPage.value--;
-        scrollToTop();
       }
     };
 
     // Fetch products on component mount
-    onMounted(fetchProducts);
+    onMounted(loadProducts);
 
     return {
       products,
       currentPage,
-      itemsPerPage,
-      isLoading,
       totalPages,
       paginatedProducts,
+      isLoading,
       toggleFavorite,
       isFavorite,
       removeFavorite,
       viewDetails,
       nextPage,
       previousPage,
+      loadProducts,
       isLoggedIn: authStore.isLoggedIn,
     };
   },
@@ -158,15 +149,15 @@ export default {
         </article>
       </li>
     </ul>
-    <div class="pagination">
-      <button :disabled="currentPage === 1" @click="previousPage">
+    <footer v-if="!isLoading" class="pagination-container">
+      <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
         Previous
       </button>
-      <span>Page {{ currentPage }} of {{ totalPages }}</span>
-      <button :disabled="currentPage === totalPages" @click="nextPage">
+      <span class="pagination-info">Page {{ currentPage }} of {{ totalPages }}</span>
+      <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
         Next
       </button>
-    </div>
+    </footer>
   </div>
 </template>
 
@@ -212,7 +203,7 @@ export default {
 .products {
   max-width: 1200px;
   margin: 0 auto;
-  padding-bottom: 80px;
+  padding-bottom: 40px;
   font-family: Arial, sans-serif;
   text-align: center;
 
@@ -241,7 +232,7 @@ h1{
 .product-card {
   width: 100%;
   max-width: 280px;
-  height: 480px; /* Fixed height for uniformity */
+  height: 470px; /* Fixed height for uniformity */
   border: 1px solid #ddd;
   border-radius: 10px;
   overflow: hidden;
@@ -306,35 +297,52 @@ h1{
   margin-top: auto; /* Pushes the price to the bottom */
   padding-bottom: 10px; /* Add space between price and bottom of the card */
 }
-
-/* Pagination */
-.pagination {
+.pagination-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
+  gap: 10px;
+  padding: 10px;
 }
 
-.pagination button {
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  margin: 0 5px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.pagination button:disabled {
-  background-color: #ddd;
-  cursor: not-allowed;
-}
-
-.pagination span {
-  font-size: 1rem;
-  margin: 0 10px;
+.pagination-button {
+  padding: 8px 16px;
+  font-size: 18px;
+  font-weight: bold;
   color: #333;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  color: #aaa;
+  border-color: #ddd;
+}
+
+.pagination-button:not(:disabled):hover {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  .pagination button {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+  }
+
+  .pagination span {
+    font-size: 1rem;
+  }
 }
 
 /* Responsive Design */
