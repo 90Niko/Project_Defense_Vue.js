@@ -1,6 +1,6 @@
 Vue.js Single Page Application 
 
-Overview
+Overview :
 This project is a Single Page Application (SPA) built with Vue.js. The application is an e-commerce platform that provides a seamless user experience with both a public area (accessible without authentication) 
 and a private area (accessible only for logged-in users). It utilizes Fake Store API for fetching product data, Pinia for state management, and Firebase Authentication for user management.
 The project includes components and logic implemented using both Options API and Composition API, showcasing flexibility and understanding of both approaches in Vue.js development.
