@@ -31,4 +31,4 @@ Error messages are displayed when invalid data is entered.
 A custom 404 page is displayed when users navigate to an invalid route.
 -----------------------------------
 6. Deployment
-The application is deployed on https://project-defense-vue-js.onrender.com
+The application is deployed on render.com and hier is the URL: https://project-defense-vue-js.onrender.com
