@@ -12,10 +12,16 @@ export default {
     </p>
     <div class="links">
       <a href="https://github.com/90Niko" target="_blank" rel="noopener noreferrer">
-        <button class="link-button">GitHub</button>
+        <button class="link-button">
+          <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" class="icon">
+          GitHub
+        </button>
       </a>
       <a href="https://www.linkedin.com/in/nikolay-geroev-ab0707255/" target="_blank" rel="noopener noreferrer">
-        <button class="link-button">LinkedIn</button>
+        <button class="link-button">
+          <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" class="icon">
+          LinkedIn
+        </button>
       </a>
     </div>
   </div>
@@ -25,11 +31,17 @@ export default {
 .about-page {
   font-family: Arial, sans-serif;
   text-align: center;
-  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .links {
   margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .link-button {
@@ -41,6 +53,9 @@ export default {
   font-size: 16px;
   border-radius: 5px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   transition: background-color 0.3s;
 }
 
@@ -50,5 +65,10 @@ export default {
 
 .link-button:hover {
   opacity: 0.9;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
 }
 </style>
