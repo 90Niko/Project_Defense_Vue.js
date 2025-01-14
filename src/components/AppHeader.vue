@@ -1,6 +1,6 @@
 <script setup>
 import { useAuthStore } from '@/stores/useAuthStore';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const authStore = useAuthStore();
 
@@ -19,11 +19,20 @@ const userName = computed(() => authStore.user?.name || '');
 function handleLogout() {
   authStore.logout();
 }
+
+const isDropdownOpen = ref(false);
+
+function toggleDropdown() {
+  isDropdownOpen.value = !isDropdownOpen.value;
+}
 </script>
 
 <template>
   <nav>
-    <ul class="main-links">
+    <button class="dropdown-toggle" @click="toggleDropdown">
+      ☰
+    </button>
+    <ul class="main-links" :class="[{ open: isDropdownOpen }]">
       <li class="cart-icon">
         🛍️
       </li>
@@ -80,6 +89,7 @@ nav {
   align-items: center;
   background-color: #333;
   padding: 0rem 1rem;
+  position: relative;
 }
 
 .main-links {
@@ -90,73 +100,61 @@ nav {
   padding: 0;
 }
 
-.login-link {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.main-links.open {
+
   display: flex;
-  color: #fff;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #333;
+  width: 100%;
+  padding: 1rem;
+  gap: 1rem;
+  z-index: 1;
 }
 
-.login-link li {
-  font-size: 1rem;
-  display: inline-block;
-  margin: 0 0.5rem;
-  color: #fff!important;
-
-}
-.login-link li .router-link:hover {
-  background-color: #555;
-  color: #bf9494;
+.auth-links {
+  display: flex;
+  gap: 1rem;
 }
 
-nav ul li a{
-  font-size: 1rem;
-  display: inline-block;
-  color: #fff;
-}
-
-nav ul li a:active {
-  color: #702222;
-  font-weight: bold; /* Optional for added emphasis */
-/* Optional for added effect */
-}
-
-nav ul li a:hover {
-  color: #7e6868;
-  transform: scale(1.1);
-  transition: color 1s ease;
-
-}
-
-.logo img {
-  height: 40px;
-  width: auto;
-}
-
-.cart-icon {
+/* Responsive Dropdown */
+.dropdown-toggle {
+  display: none;
+  background: none;
+  border: none;
   font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+}
+
+.dropdown-toggle:focus {
+  outline: none;
+}
+
+.logo-and-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-  nav {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .main-links {
+    display: none;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
   }
 
-  .login-link {
-    margin-top: 1rem;
+  .auth-links {
+    flex-direction: row;
+    gap: 0.5rem;
   }
 
-  .logo {
-    margin-bottom: 1rem;
+  .dropdown-toggle {
+    display: block;
   }
 }
 </style>
