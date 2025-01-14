@@ -57,6 +57,15 @@ textarea,
 select {
   font: inherit;
 }
+body, html {
+  min-height: 100vh; /* Ensures the layout spans the entire viewport height */
+  background-image: url('../src/images/background.png'); /* Path to your background image */
+  background-size: cover; /* Ensures the image covers the entire container */
+  background-repeat: no-repeat; /* Prevents the image from repeating */
+  background-position: center; /* Centers the image */
+  margin: 0; /* Removes default margin */
+  padding: 0; /* Removes default padding */
+}
 
 /* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
 @media (prefers-reduced-motion: reduce) {

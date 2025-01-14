@@ -21,14 +21,12 @@ export default {
 </template>
 
 <style scoped>
-.layout-container {
-  min-height: 100vh; /* Ensures the layout spans the entire viewport height */
-  display: flex;
-  flex-direction: column;
-  background-image: url('../src/images/background.png'); /* Add the path to your background image */
-  background-size: cover; /* Ensures the image covers the entire container */
-  background-repeat: no-repeat; /* Prevents the image from repeating */
-  background-position: center; /* Centers the image */
+  .layout-container {
+  min-height: 100vh;
+  background-image: url('../src/images/background.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .main-content {
