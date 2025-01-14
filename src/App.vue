@@ -30,7 +30,7 @@ export default {
 }
 
 .main-content {
- /* Allows the content to grow and push the footer down */
-  padding: 10px; /* Optional: Add some padding for content */
+  padding: 0.6rem;
+
 }
 </style>
