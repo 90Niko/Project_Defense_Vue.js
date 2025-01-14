@@ -218,7 +218,7 @@ h2 {
 }
 
 .registration-form {
-  max-width: 400px;
+  max-width: 380px;
   margin: 0 auto;
   padding: 20px;
   border: 1px solid #ccc;
@@ -228,7 +228,6 @@ h2 {
 
 label {
   display: block;
-  margin-bottom: 5px;
 }
 
 input {
@@ -238,12 +237,15 @@ input {
 }
 
 button {
-  padding: 10px 20px;
+  margin-top: 15px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+.form-group input {
+  margin-bottom:0;
 }
 
 button:hover {
