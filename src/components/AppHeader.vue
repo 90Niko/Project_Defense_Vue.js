@@ -25,6 +25,9 @@ const isDropdownOpen = ref(false);
 function toggleDropdown() {
   isDropdownOpen.value = !isDropdownOpen.value;
 }
+function closeDropdown() {
+  isDropdownOpen.value = false;
+}
 </script>
 
 <template>
@@ -36,7 +39,7 @@ function toggleDropdown() {
       <li class="cart-icon">
         🛍️
       </li>
-      <li v-for="link in links" :key="link.name" class="navbar">
+      <li v-for="link in links" :key="link.name" class="navbar" @click="closeDropdown">
         <router-link :to="{ name: link.name }">
           {{ link.label }}
         </router-link>
