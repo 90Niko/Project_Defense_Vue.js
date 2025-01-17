@@ -48,9 +48,7 @@ export default {
     <h1>Your Favorites</h1>
     <!-- Show message and login button if the user is not logged in -->
     <div v-if="!isLoggedIn" class="login-prompt">
-      <p class="login-message">
-        Please log in to view your favorite products.
-      </p>
+      <p>You must log in to view the users list.</p>
       <button class="login-button" @click="redirectToLogin">
         Log In
       </button>
