@@ -2,6 +2,7 @@
 import { fetchUsers } from '@/services/userServices';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 export default {
   name: 'Users',
@@ -9,6 +10,11 @@ export default {
     const users = ref([]);
     const isLoading = ref(false);
     const authStore = useAuthStore();
+    const router = useRouter();
+
+    const redirectToLogin = () => {
+      router.push('/login'); // Navigate to Login.vue
+    };
 
     const loadUsers = async () => {
       isLoading.value = true;
@@ -34,6 +40,7 @@ export default {
       users,
       isLoading,
       isLoggedIn: computed(() => authStore.isLoggedIn),
+      redirectToLogin,
     };
   },
 };
@@ -54,6 +61,9 @@ export default {
     </div>
     <div v-else class="login-prompt">
       <p>You must log in to view the users list.</p>
+      <button class="login-button" @click="redirectToLogin">
+        Log In
+      </button>
     </div>
   </div>
 </template>
