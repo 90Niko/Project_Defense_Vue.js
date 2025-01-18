@@ -4,8 +4,8 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/useAuthStore';
 
-const username = ref('mor_2314');
-const password = ref('83r5^_');
+const username = ref('');
+const password = ref('');
 const errorMessage = ref(null);
 const authStore = useAuthStore();
 const router = useRouter();
@@ -14,27 +14,32 @@ const isLoading = ref(false);
 async function handleLogin() {
   isLoading.value = true;
   errorMessage.value = null;
+
   try {
-    const response = await axios.post('https://fakestoreapi.com/auth/login', {
-      username: username.value,
+    const response = await axios.post('http://localhost:5084/api/auth/login', {
+      email: username.value,
       password: password.value,
     });
 
     const data = response.data;
 
     console.log('Login successful:', data);
-    document.cookie = `token=${data.token}; path=/; Secure`; // Securely store the token as a cookie
-    authStore.setLoggedIn(true, { name: username.value }); // Update authStore with logged-in status and user data
-    router.push({ name: 'home' }); // Redirect to the home page
+
+    // Save token securely
+    localStorage.setItem('token', data.token);
+
+    // Call setLoggedIn method in the store
+    authStore.setLoggedIn(true, { name: username.value });
+
+    // Redirect to home
+    router.push({ name: 'home' });
   }
   catch (error) {
     console.error('Error during login:', error);
-    if (error.response && error.response.data && error.response.data.message) {
-      errorMessage.value = error.response.data.message;
-    }
-    else {
-      errorMessage.value = 'An error occurred. Please try again later.';
-    }
+    errorMessage.value = error.response?.data?.message || 'An error occurred. Please try again.';
+  }
+  finally {
+    isLoading.value = false;
   }
 }
 </script>
@@ -46,24 +51,14 @@ async function handleLogin() {
     <form @submit.prevent="handleLogin">
       <div>
         <label for="username">Username:</label>
-        <input
-          id="username"
-          v-model="username"
-          type="text"
-          required
-        >
+        <input id="username" v-model="username" type="text" required>
       </div>
       <div>
         <label for="password">Password:</label>
-        <input
-          id="password"
-          v-model="password"
-          type="password"
-          required
-        >
+        <input id="password" v-model="password" type="password" required>
       </div>
-      <button type="submit">
-        Login
+      <button type="submit" :disabled="isLoading">
+        {{ isLoading ? 'Logging in...' : 'Login' }}
       </button>
       <p v-if="errorMessage" class="error">
         {{ errorMessage }}
@@ -76,12 +71,11 @@ async function handleLogin() {
 .loader-line {
   width: 100%;
   height: 3px;
-  position: relative;
-  overflow: hidden;
   background-color: #ddd;
   margin: 0 auto;
   border-radius: 20px;
-  padding: auto;
+  position: relative;
+  overflow: hidden;
 }
 
 .loader-line:before {
@@ -90,10 +84,20 @@ async function handleLogin() {
   left: -50%;
   height: 3px;
   width: 40%;
-  background-color: #212020;
+  background-color: #444;
   animation: lineAnim 1s linear infinite;
   border-radius: 20px;
 }
+
+@keyframes lineAnim {
+  0% {
+    left: -50%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
 .login-form {
   max-width: 400px;
   margin: 0 auto;
@@ -134,7 +138,7 @@ async function handleLogin() {
 }
 
 .login-form button:hover {
-  background-color: #e6e6e6;
+  background-color: #666;
 }
 
 .error {

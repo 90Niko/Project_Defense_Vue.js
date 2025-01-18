@@ -1,25 +1,51 @@
+import axios from 'axios';
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
 
-export const useAuthStore = defineStore('auth', () => {
-  const isLoggedIn = ref(false);
-  const user = ref(null);
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    token: null,
+    user: null,
+    isLoggedIn: false,
+  }),
 
-  const setLoggedIn = (status, userData = null) => {
-    isLoggedIn.value = status;
-    user.value = userData;
-  };
+  actions: {
+    setLoggedIn(status, user) {
+      this.isLoggedIn = status;
+      this.user = user;
+    },
 
-  const logout = () => {
-    isLoggedIn.value = false;
-    user.value = null;
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure';
-  };
+    setToken(token) {
+      this.token = token;
+    },
+    async initializeAuth() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        this.token = token;
 
-  return {
-    isLoggedIn,
-    user,
-    setLoggedIn,
-    logout, // Ensure logout is returned
-  };
+        try {
+          // Correct endpoint for token validation
+          const response = await axios.get('http://localhost:5084/api/auth/user', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          // Set user data and logged-in status
+          this.isLoggedIn = true;
+          this.user = response.data; // Replace with actual user data returned by the API
+        }
+        catch (error) {
+          console.error('Token validation failed:', error);
+          this.logout(); // Clear the state if validation fails
+        }
+      }
+    },
+
+    logout() {
+      this.token = null;
+      this.user = null;
+      this.isLoggedIn = false;
+      localStorage.removeItem('token');
+    },
+  },
 });
