@@ -338,7 +338,7 @@ body {
 
 .form-icon {
   position: absolute;
-  top: 78%;
+  top: 81%;
   left: 10px;
   transform: translateY(-45%);
 }

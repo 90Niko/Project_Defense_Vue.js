@@ -102,6 +102,7 @@ body {
   padding: 20px;
   box-sizing: border-box;
   margin: 0 auto;
+  margin-top: 100px;
 
 }
 .form-title {
