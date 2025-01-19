@@ -47,14 +47,28 @@ async function handleLogin() {
 <template>
   <progress v-if="isLoading" class="loader-line" />
   <div class="login-form">
-    <h2>Login</h2>
+    <h2 class="form-title">
+      Login
+    </h2>
     <form @submit.prevent="handleLogin">
       <div>
-        <label for="username">Username:</label>
+        <label for="username"><img
+          class="form-icon"
+          width="24"
+          height="24"
+          src="https://img.icons8.com/sf-black-filled/24/new-post.png"
+          alt="email"
+        > Email:</label>
         <input id="username" v-model="username" type="text" required>
       </div>
       <div>
-        <label for="password">Password:</label>
+        <label for="password">  <img
+          class="form-icon"
+          width="24"
+          height="24"
+          src="https://img.icons8.com/material-sharp/24/password.png"
+          alt="password"
+        >Password:</label>
         <input id="password" v-model="password" type="password" required>
       </div>
       <button type="submit" :disabled="isLoading">
@@ -68,82 +82,137 @@ async function handleLogin() {
 </template>
 
 <style scoped>
-.loader-line {
-  width: 100%;
-  height: 3px;
-  background-color: #ddd;
-  margin: 0 auto;
-  border-radius: 20px;
-  position: relative;
-  overflow: hidden;
-}
-
-.loader-line:before {
-  content: "";
-  position: absolute;
-  left: -50%;
-  height: 3px;
-  width: 40%;
-  background-color: #444;
-  animation: lineAnim 1s linear infinite;
-  border-radius: 20px;
-}
-
-@keyframes lineAnim {
-  0% {
-    left: -50%;
-  }
-  100% {
-    left: 100%;
-  }
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
 .login-form {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
   max-width: 400px;
-  margin: 0 auto;
   padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background-color: #f9f9f9;
-}
+  box-sizing: border-box;
+  margin: 0 auto;
+  margin-top: 100px;
 
-.login-form h2 {
+}
+.form-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333333;
   text-align: center;
   margin-bottom: 20px;
 }
+.loader-line {
+  height: 4px;
+  background-color: #007bff;
+  width: 100%;
+  animation: loading 1.5s linear infinite;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+@keyframes loading {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.login-form form {
+  display: flex;
+  flex-direction: column;
+}
 
 .login-form div {
-  margin-bottom: 15px;
+  position: relative;
+  margin-bottom: 20px;
 }
 
-.login-form label {
-  display: block;
-  margin-bottom: 5px;
+.form-icon {
+  position: absolute;
+  left: 10px;
+  top: 72%;
+  transform: translateY(-50%);
+  z-index: 1;
+  pointer-events: none;
 }
 
-.login-form input {
+input[type="text"],
+input[type="password"] {
   width: 100%;
-  padding: 8px;
+  height: 50px;
+  padding: 10px 10px 10px 40px; /* Space for the icon */
+  font-size: 14px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
   box-sizing: border-box;
+  background-color: white;
+  transition: border-color 0.2s;
+  color: #333333;
+  margin: 0 auto;
 }
 
-.login-form button {
-  width: 100%;
-  padding: 10px;
-  background-color: #444;
-  color: white;
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: #007bff;
+}
+
+/* Submit Button */
+button {
+  background-color: #555;
+  color: #ffffff;
+  padding: 12px;
+  margin-bottom: 5px;
+  font-size: 16px;
+  font-weight: bold;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
-}
-
-.login-form button:hover {
-  background-color: #666;
-}
-
-.error {
-  color: red;
-  margin-top: 10px;
+  transition: background-color 0.2s;
   text-align: center;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background-color: #333;
+}
+
+/* Error Message */
+.error {
+  font-size: 14px;
+  color: #dc3545;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .login-form {
+    padding: 15px;
+  }
+
+  .login-form h2 {
+    font-size: 20px;
+  }
+
+  button {
+    padding: 10px;
+    font-size: 14px;
+  }
 }
 </style>

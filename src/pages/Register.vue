@@ -25,8 +25,9 @@ export default {
       firstName: { required, minLength: minLength(3), maxLength: maxLength(15) },
       lastName: { required, minLength: minLength(3), maxLength: maxLength(15) },
       email: { required, email },
-      phoneNumber: { required, numeric, minLength: minLength(5), maxLength: maxLength(10) },
+      password: { required, minLength: minLength(6), maxLength: maxLength(20) },
       age: { required, numeric },
+      gender: { required },
     };
 
     const v$ = useVuelidate(rules, form);
@@ -61,26 +62,14 @@ export default {
 
       try {
         const response = await axios.post(
-          'https://fakestoreapi.com/users',
+          'http://localhost:5084/api/User/register',
           {
+            firstName: form.value.firstName,
+            lastName: form.value.lastName,
             email: form.value.email,
-            username: `${form.value.firstName.toLowerCase()}${form.value.lastName.toLowerCase()}`,
-            password: 'm38rmF$',
-            name: {
-              firstname: form.value.firstName,
-              lastname: form.value.lastName,
-            },
-            address: {
-              city: 'kilcoole',
-              street: '7835 new road',
-              number: 3,
-              zipcode: '12926-3874',
-              geolocation: {
-                lat: '-37.3159',
-                long: '81.1496',
-              },
-            },
-            phone: form.value.phoneNumber,
+            password: form.value.password,
+            male: form.value.gender,
+            age: form.value.age,
           },
           {
             headers: {
@@ -120,188 +109,325 @@ export default {
 </script>
 
 <template>
-  <div v-if="isLoading" class="loader-line" />
-  <div v-if="submitted && !submissionError" class="submission-info">
-    <h3>Form Submitted Successfully!</h3>
-  </div>
-  <div v-if="submissionError" class="error-message">
-    <h3>{{ submissionError }}</h3>
-  </div>
-  <div class="registration-form">
-    <h2>Registration</h2>
-    <form @submit.prevent="submitForm">
-      <div class="form-group">
-        <label for="firstName">First Name:</label>
-        <input id="firstName" v-model="form.firstName" type="text" required placeholder="Enter your first name...">
-        <p v-if="v$.firstName.$error" class="error-text">
-          {{ v$.firstName.$errors[0]?.$message }}
-        </p>
-      </div>
+  <div class="registration-container">
+    <!-- Loading Indicator -->
+    <div v-if="isLoading" class="loading-indicator" />
 
-      <div class="form-group">
-        <label for="lastName">Last Name:</label>
-        <input id="lastName" v-model="form.lastName" type="text" required placeholder="Enter your last name...">
-        <p v-if="v$.lastName.$error" class="error-text">
-          {{ v$.lastName.$errors[0]?.$message }}
-        </p>
-      </div>
+    <!-- Success Message -->
+    <div v-if="submitted && !submissionError" class="success-message">
+      <h3>Form Submitted Successfully!</h3>
+    </div>
 
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input id="email" v-model="form.email" type="email" required placeholder="Enter your email...">
-        <p v-if="v$.email.$error" class="error-text">
-          {{ v$.email.$errors[0]?.$message }}
-        </p>
-      </div>
+    <!-- Error Message -->
+    <div v-if="submissionError" class="error-message">
+      <h3>{{ submissionError }}</h3>
+    </div>
 
-      <div class="form-group">
-        <label for="phoneNumber">Phone Number:</label>
-        <input id="phoneNumber" v-model="form.phoneNumber" type="tel" required placeholder="Enter your phone number...">
-        <p v-if="v$.phoneNumber.$error" class="error-text">
-          {{ v$.phoneNumber.$errors[0]?.$message }}
-        </p>
-      </div>
+    <!-- Registration Form -->
+    <div class="form-wrapper">
+      <h2 class="form-title">
+        Registration
+      </h2>
+      <form class="form-content" @submit.prevent="submitForm">
+        <!-- First Name -->
+        <div class="form-group">
+          <label for="firstName" class="form-label">
+            <img
+              class="form-icon"
+              width="24"
+              height="24"
+              src="https://img.icons8.com/fluency-systems-filled/24/name.png"
+              alt="name"
+            >
+            First Name
+          </label>
+          <input
+            id="firstName"
+            v-model="form.firstName"
+            type="text"
+            required
+            placeholder="Enter your first name..."
+            class="form-input"
+          >
+          <p v-if="v$.firstName.$error" class="error-text">
+            {{ v$.firstName.$errors[0]?.$message }}
+          </p>
+        </div>
 
-      <div class="form-group">
-        <label for="age">Age:</label>
-        <input id="age" v-model="form.age" type="text" required placeholder="Enter your age...">
-        <p v-if="v$.age.$error" class="error-text">
-          {{ v$.age.$errors[0]?.$message }}
-        </p>
-      </div>
+        <!-- Last Name -->
+        <div class="form-group">
+          <label for="lastName" class="form-label">
+            <img
+              class="form-icon"
+              width="24"
+              height="24"
+              src="https://img.icons8.com/fluency-systems-filled/24/name.png"
+              alt="name"
+            >
+            Last Name
+          </label>
+          <input
+            id="lastName"
+            v-model="form.lastName"
+            type="text"
+            required
+            placeholder="Enter your last name..."
+            class="form-input"
+          >
+          <p v-if="v$.lastName.$error" class="error-text">
+            {{ v$.lastName.$errors[0]?.$message }}
+          </p>
+        </div>
 
-      <button type="submit">
-        Submit
-      </button>
-    </form>
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email" class="form-label">
+            <img
+              class="form-icon"
+              width="24"
+              height="24"
+              src="https://img.icons8.com/sf-black-filled/24/new-post.png"
+              alt="email"
+            >
+            Email
+          </label>
+          <input
+            id="email"
+            v-model="form.email"
+            type="email"
+            required
+            placeholder="Enter your email..."
+            class="form-input"
+          >
+          <p v-if="v$.email.$error" class="error-text">
+            {{ v$.email.$errors[0]?.$message }}
+          </p>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password" class="form-label">
+            <img
+              class="form-icon"
+              width="24"
+              height="24"
+              src="https://img.icons8.com/material-sharp/24/password.png"
+              alt="password"
+            >
+            Password
+          </label>
+          <input
+            id="password"
+            v-model="form.password"
+            type="password"
+            required
+            placeholder="Enter your password..."
+            class="form-input"
+          >
+          <p v-if="v$.password.$error" class="error-text">
+            {{ v$.password.$errors[0]?.$message }}
+          </p>
+        </div>
+
+        <!-- Age -->
+        <div class="form-group">
+          <label for="age" class="form-label">
+            <img
+              class="form-icon"
+              width="24"
+              height="24"
+              src="https://img.icons8.com/sf-regular-filled/24/age.png"
+              alt="age"
+            >
+            Age
+          </label>
+          <input
+            id="age"
+            v-model="form.age"
+            type="text"
+            required
+            placeholder="Enter your age..."
+            class="form-input"
+          >
+          <p v-if="v$.age.$error" class="error-text">
+            {{ v$.age.$errors[0]?.$message }}
+          </p>
+        </div>
+
+        <!-- Gender -->
+        <div class="form-group">
+          <label for="gender" class="form-label">
+            <img
+              class="form-icon"
+              width="24"
+              height="24"
+              src="https://img.icons8.com/glyph-neue/24/gender.png"
+              alt="gender"
+            >
+            Gender
+          </label>
+          <select
+            id="gender"
+            v-model="form.gender"
+            required
+            class="form-select"
+          >
+            <option value="" disabled>
+              Select your gender...
+            </option>
+            <option value="male">
+              Male
+            </option>
+            <option value="female">
+              Female
+            </option>
+          </select>
+          <p v-if="v$.gender.$error" class="error-text">
+            {{ v$.gender.$errors[0]?.$message }}
+          </p>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="form-button">
+          Submit
+        </button>
+      </form>
+    </div>
   </div>
 </template>
 
 <style scoped>
-h2 {
-  text-align: center;
-  margin-bottom: 10px;
+/* General Styling */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
-.loader-line {
+
+.registration-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
-  height: 3px;
-  position: relative;
-  overflow: hidden;
-  background-color: #ddd;
+  max-width: 400px;
+  padding: 20px;
+  box-sizing: border-box;
   margin: 0 auto;
-  border-radius: 20px;
+  margin-bottom: 70px;
 }
 
-.loader-line:before {
-  content: "";
+/* Form Title */
+.form-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333333;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Form Group Styling */
+.form-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.form-icon {
   position: absolute;
-  left: -50%;
-  height: 3px;
-  width: 40%;
-  background-color: #212020;
-  animation: lineAnim 1s linear infinite;
-  border-radius: 20px;
+  top: 81%;
+  left: 10px;
+  transform: translateY(-45%);
 }
 
-@keyframes lineAnim {
+.form-input,
+.form-select {
+  width: 100%;
+  height: 50px;
+  padding: 5px 5px 5px 40px; /* Padding left to make space for the icon */
+  font-size: 14px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: white;
+  transition: border-color 0.2s;
+  margin:-12px auto;
+  margin-top: 0.5px;
+  color: #333333;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.form-select {
+  padding: 10px 10px 10px 40px; /* Same padding to align with input fields */
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+/* Error Text */
+.error-text {
+  font-size: 12px;
+  color: #dc3545;
+  margin-top: 5px;
+}
+
+/* Submit Button */
+.form-button {
+  background-color: #555;
+  color: #ffffff;
+  padding: 12px 20px;
+  margin-bottom: 7px;
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.form-button:hover {
+  background-color: #222;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+  height: 4px;
+  background-color: #007bff;
+  width: 100%;
+  animation: loading 1.5s linear infinite;
+}
+
+@keyframes loading {
   0% {
-    left: -40%;
-  }
-  50% {
-    left: 20%;
-    width: 80%;
+    width: 0;
   }
   100% {
-    left: 100%;
     width: 100%;
   }
 }
 
-.registration-form {
-  max-width: 380px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-}
+/* Responsive Design */
+@media (max-width: 480px) {
+  .registration-container {
+    padding: 15px;
+  }
 
-label {
-  display: block;
-}
+  .form-title {
+    font-size: 20px;
+  }
 
-input {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-}
-
-button {
-  margin-top: 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.form-group input {
-  margin-bottom:0;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-.error-message {
-  color: #d9534f;
-  background-color: #f2dede;
-  padding: 10px;
-  border: 1px solid #ebccd1;
-  border-radius: 5px;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.error-list {
-  margin-bottom: 20px;
-  color: #d9534f;
-}
-
-.error-list ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.error-list li {
-  margin-bottom: 5px;
-}
-
-.error-text {
-  color: #d9534f;
-  font-size: 0.875rem;
-  margin-top: 5px;
-}
-
-.submission-info {
-  margin-top: 20px;
-  padding: 15px;
-  border: 2px solid #28a745;
-  border-radius: 10px;
-  background-color: #e6ffed;
-  color: #155724;
-  font-family: Arial, sans-serif;
-  font-size: 1rem;
-  line-height: 1.5;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  margin: auto;
-  width: 30%;
-  margin: 20px auto;
-}
-
-.submission-info h3 {
-  margin-top: 0;
-  font-size: 1.2rem;
-  color: #155724;
+  .form-button {
+    padding: 10px;
+    font-size: 14px;
+  }
 }
 </style>
