@@ -3,11 +3,11 @@ import api from './apiServices';
 export async function login(email, password) {
   try {
     const response = await api.post('/auth/login', { email, password });
-    const { token } = response.data;
+    const { token, role } = response.data;
 
     // Store the token in localStorage
     localStorage.setItem('token', token);
-
+    localStorage.setItem('userRole', role);
     return response.data;
   }
   catch (error) {
