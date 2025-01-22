@@ -21,18 +21,29 @@ async function handleLogin() {
       password: password.value,
     });
 
-    const data = response.data;
+    // Ensure role exists in the response
+    const { token, role } = response.data;
 
-    console.log('Login successful:', data);
+    if (!role) {
+      throw new Error('Role is missing in the response'); // Handle missing role
+    }
 
-    // Save token securely
-    localStorage.setItem('token', data.token);
+    // Save token and role securely
+    localStorage.setItem('token', token);
+    localStorage.setItem('role', role);
 
     // Call setLoggedIn method in the store
-    authStore.setLoggedIn(true, { name: username.value });
+    authStore.setLoggedIn(true, { name: username.value, role });
 
-    // Redirect to home
-    router.push({ name: 'home' });
+    // Redirect based on role
+    if (role === 'Admin') {
+      router.push({ name: 'AdminDashboard' }); // Admin dashboard
+    }
+    else {
+      router.push({ name: 'home' }); // Regular user home
+    }
+    console.log('Login successful:', response.data);
+    console.log('Role:', role);
   }
   catch (error) {
     console.error('Error during login:', error);

@@ -1,6 +1,6 @@
 <script setup>
 import { useAuthStore } from '@/stores/useAuthStore';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 const authStore = useAuthStore();
 
@@ -10,7 +10,6 @@ const links = [
   { name: 'contacts', label: 'Contacts' },
   { name: 'favorite', label: 'Favorite' },
   { name: 'products', label: 'Products' },
-  { name: 'users', label: 'Users' },
 ];
 
 const isLoggedIn = computed(() => authStore.isLoggedIn);

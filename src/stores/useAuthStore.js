@@ -5,47 +5,65 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: null,
     user: null,
+    role: null,
     isLoggedIn: false,
   }),
 
   actions: {
-    setLoggedIn(status, user) {
+    setLoggedIn(status, user, role) {
       this.isLoggedIn = status;
       this.user = user;
+      this.role = role;
     },
 
     setToken(token) {
       this.token = token;
+      localStorage.setItem('token', token);
     },
+
     async initializeAuth() {
       const token = localStorage.getItem('token');
       if (token) {
         this.token = token;
 
         try {
-          // Correct endpoint for token validation
           const response = await axios.get('http://localhost:5084/api/auth/user', {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
 
-          // Set user data and logged-in status
+          const user = response.data;
+
+          // Set user data, role, and logged-in status
           this.isLoggedIn = true;
-          this.user = response.data; // Replace with actual user data returned by the API
+          this.user = user;
+          this.role = user.role || ''; // Ensure the API includes `role` in its response
         }
         catch (error) {
           console.error('Token validation failed:', error);
-          this.logout(); // Clear the state if validation fails
+          this.logout();
         }
       }
+      this.isLoading = false;
     },
 
     logout() {
       this.token = null;
       this.user = null;
+      this.role = null;
       this.isLoggedIn = false;
       localStorage.removeItem('token');
+    },
+  },
+
+  getters: {
+    isAdmin() {
+      return this.role === 'Admin';
+    },
+
+    isUser() {
+      return this.role === 'User';
     },
   },
 });
