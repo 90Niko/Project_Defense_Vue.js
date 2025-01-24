@@ -28,7 +28,8 @@ const routes = [
     path: '/admin',
     name: 'Admin',
     meta: { requiresAdmin: true }, // Admin-specific meta
-    component: () => import('@/layouts/AdminLayout.vue'), // Admin layout
+    component: () => import('@/layouts/AdminLayout.vue'),
+    // Admin layout
     children: [
       {
         path: 'dashboard',
@@ -39,6 +40,16 @@ const routes = [
         path: 'manage-users',
         name: 'ManageUsers',
         component: () => import('@/pages/admin/ManageUsers.vue'),
+      },
+      {
+        path: 'create-product',
+        name: 'CreateProduct',
+        component: () => import('@/pages/admin/CreateProduct.vue'),
+      },
+      {
+        path: 'create-category',
+        name: 'CreateCategory',
+        component: () => import('@/pages/admin/CreateCategory.vue'),
       },
       // Add more admin routes here
     ],

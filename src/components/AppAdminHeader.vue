@@ -7,6 +7,12 @@
       <router-link to="/admin/manage-users">
         Users
       </router-link>
+      <router-link to="/admin/create-product">
+        Create Product
+      </router-link>
+      <router-link to="/admin/create-category">
+        Create Category
+      </router-link>
     </nav>
   </header>
 </template>

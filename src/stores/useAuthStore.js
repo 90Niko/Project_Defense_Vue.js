@@ -23,7 +23,8 @@ export const useAuthStore = defineStore('auth', {
 
     async initializeAuth() {
       const token = localStorage.getItem('token');
-      if (token) {
+      const role = localStorage.getItem('userRole');
+      if (token && role) {
         this.token = token;
 
         try {
