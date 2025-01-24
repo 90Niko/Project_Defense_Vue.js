@@ -12,8 +12,8 @@ export default {
 
 <template>
   <div class="layout-container">
+    <!-- Conditionally render either AdminHeader or AppHeader -->
     <AppHeader />
-
     <main class="main-content">
       <router-view />
     </main>
@@ -22,7 +22,7 @@ export default {
 </template>
 
 <style scoped>
-  .layout-container {
+.layout-container {
   min-height: 100vh;
   background-image: url('../src/images/background.png');
   background-size: cover;
@@ -32,6 +32,5 @@ export default {
 
 .main-content {
   padding: 0.6rem;
-
 }
 </style>
