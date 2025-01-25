@@ -1,3 +1,4 @@
+import router from '../config/router';
 import api from './apiServices';
 
 export async function login(email, password) {
@@ -20,6 +21,7 @@ export async function isAuthenticated() {
 }
 export function logout() {
   localStorage.removeItem('token');
+  router.push({ name: 'home' });
 }
 
 export async function getCurrentUser() {

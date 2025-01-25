@@ -1,6 +1,6 @@
 <template>
   <footer class="app-footer">
-    <p>&copy; {{ new Date().getFullYear() }}</p>
+    <p>&copy; {{ new Date().getFullYear() }} Designed by N.Geroev</p>
   </footer>
 </template>
 

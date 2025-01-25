@@ -1,30 +1,16 @@
 <template>
-  <header>
-    <nav>
-      <router-link to="/admin/dashboard">
-        Dashboard
-      </router-link>
-      <router-link to="/admin/manage-users">
-        Users
-      </router-link>
-      <router-link to="/admin/create-product">
-        Create Product
-      </router-link>
-      <router-link to="/admin/create-category">
-        Create Category
-      </router-link>
-    </nav>
-  </header>
+  <h2>Admin Area</h2>
 </template>
 
-  <style>
-  header {
-    background-color: #343a40;
-    color: white;
-    padding: 10px;
-  }
-  nav a {
-    margin-right: 10px;
-    color: white;
-  }
-  </style>
+<style scoped>
+/* Define color variables for better maintainability */
+h2 {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 2rem;
+  font-weight: bold;
+  text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+  transition: color 0.3s ease, transform 0.3s ease; /* Smooth hover effect */
+  color: #333; /* Default color */
+}
+</style>
