@@ -1,10 +1,67 @@
 <script>
+import axios from 'axios';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
 export default {
   name: 'AdminDashboard',
-  methods: {
-    navigateTo(path) {
-      this.$router.push(path); // Use Vue Router's push method
-    },
+  setup() {
+    const router = useRouter();
+
+    // Reactive state for categories count
+    const categoriesCount = ref(0);
+    const productsCount = ref(0);
+    const usersCount = ref(0);
+
+    // Fetch categories count
+    const fetchCategoriesCount = async () => {
+      try {
+        const response = await axios.get('http://localhost:5084/api/Category/getAll');
+        categoriesCount.value = response.data.length;
+      }
+      catch (error) {
+        console.error('Error fetching categories:', error);
+        categoriesCount.value = 0; // Default to 0 in case of error
+      }
+    };
+
+    const fetchProductsCount = async () => {
+      try {
+        const response = await axios.get('http://localhost:5084/api/Product/getAll');
+        productsCount.value = response.data.length;
+      }
+      catch (error) {
+        console.error('Error fetching products:', error);
+        productsCount.value = 0; // Default to 0 in case of error
+      }
+    };
+
+    const fetchUsersCount = async () => {
+      try {
+        const response = await axios.get('http://localhost:5084/api/User/getAll');
+        usersCount.value = response.data.length;
+      }
+      catch (error) {
+        console.error('Error fetching users:', error);
+        usersCount.value = 0; // Default to 0 in case of error
+      }
+    };
+
+    // Call fetch function on component setup
+    fetchCategoriesCount();
+    fetchProductsCount();
+    fetchUsersCount();
+
+    const navigateTo = (path) => {
+      router.push(path);
+    };
+
+    return {
+      navigateTo,
+      categoriesCount,
+      productsCount,
+      usersCount,
+    };
   },
 };
 </script>
@@ -12,13 +69,13 @@ export default {
 <template>
   <div class="button-group">
     <button type="button" class="product-button" aria-label="Manage Products" @click="navigateTo('/admin/create-product')">
-      Product
+      Product: {{ productsCount }}
     </button>
     <button type="button" class="category-button" aria-label="Manage Categories" @click="navigateTo('/admin/create-category')">
-      Category
+      Category: {{ categoriesCount }}
     </button>
     <button type="button" class="user-button" aria-label="Manage Users" @click="navigateTo('/admin/manage-users')">
-      User
+      User Account: {{ usersCount }}
     </button>
   </div>
 </template>
@@ -66,7 +123,7 @@ button:active {
 
 .user-button {
   background-color: #ffc107; /* Yellow */
-  color: #333; /* Darker text for better contrast */
+  /* Darker text for better contrast */
 }
 @media (max-width: 768px) {
   .button-group {
