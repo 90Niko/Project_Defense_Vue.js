@@ -64,7 +64,6 @@ export default {
 
 <template>
   <div>
-    <h1>All Categories</h1>
     <table>
       <thead>
         <tr>

@@ -57,7 +57,7 @@ export default {
 
         // Navigate to the admin dashboard
         setTimeout(() => {
-          router.push('/admin/dashboard');
+          router.push('/admin/category/all-category');
         }, 2000);
       }
       catch (error) {
@@ -87,7 +87,6 @@ export default {
 
 <template>
   <main class="admin-content">
-    <h1>Create Category</h1>
     <form class="form" @submit.prevent="createCategory">
       <div class="form-group">
         <label for="name" class="form-label">Name</label>
