@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
+
+// Import Components
 import About from '../pages/About.vue';
 import Contacts from '../pages/Contacts.vue';
 import Details from '../pages/Details.vue';
@@ -13,6 +15,7 @@ import Users from '../pages/Users.vue';
 // Navigation guard for protected routes
 import { getCurrentUser, isAuthenticated } from '@/services/authServices';
 
+// Route Configuration
 const routes = [
   { path: '/', name: 'home', component: Home },
   { path: '/about', name: 'about', component: About },
@@ -27,9 +30,8 @@ const routes = [
   {
     path: '/admin',
     name: 'Admin',
-    meta: { requiresAdmin: true }, // Admin-specific meta
+    meta: { requiresAdmin: true },
     component: () => import('@/layouts/AdminLayout.vue'),
-    // Admin layout
     children: [
       {
         path: 'dashboard',
@@ -47,22 +49,39 @@ const routes = [
         component: () => import('@/pages/admin/CreateProduct.vue'),
       },
       {
-        path: 'create-category',
-        name: 'CreateCategory',
-        component: () => import('@/pages/admin/CreateCategory.vue'),
+        path: 'category',
+        name: 'Category',
+        component: () => import('@/pages/admin/Category.vue'),
+        children: [
+          {
+            path: 'all-category',
+            name: 'AllCategory',
+            component: () => import('@/pages/admin/categories/AllCategory.vue'),
+          },
+          {
+            path: 'create-category',
+            name: 'CreateCategory',
+            component: () => import('@/pages/admin/categories/CreateCategory.vue'),
+            props: true,
+          },
+        ],
       },
-      // Add more admin routes here
     ],
   },
-  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound }, // Fallback Route
 ];
 
+// Create Router Instance
 const router = createRouter({
-  routes,
   history: createWebHistory(),
+  routes,
 });
 
+// Navigation Guard
 router.beforeEach(async (to, from, next) => {
+  console.log('Navigating to:', to.fullPath); // Debugging navigation
+  console.log('Matched routes:', to.matched.map(route => route.path)); // Debugging matched routes
+
   try {
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
     const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
@@ -77,7 +96,6 @@ router.beforeEach(async (to, from, next) => {
         const user = await getCurrentUser();
         console.log('Authenticated User:', user);
 
-        // Check if the user has the Admin role
         if (user.roles && user.roles.includes('Admin')) {
           return next(); // Allow admin access
         }
