@@ -71,7 +71,7 @@ export default {
     <button type="button" class="product-button" aria-label="Manage Products" @click="navigateTo('/admin/create-product')">
       Product: {{ productsCount }}
     </button>
-    <button type="button" class="category-button" aria-label="Manage Categories" @click="navigateTo('/admin/create-category')">
+    <button type="button" class="category-button" aria-label="Manage Categories" @click="navigateTo('/admin/category')">
       Category: {{ categoriesCount }}
     </button>
     <button type="button" class="user-button" aria-label="Manage Users" @click="navigateTo('/admin/manage-users')">
