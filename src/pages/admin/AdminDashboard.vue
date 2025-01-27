@@ -68,7 +68,7 @@ export default {
 
 <template>
   <div class="button-group">
-    <button type="button" class="product-button" aria-label="Manage Products" @click="navigateTo('/admin/create-product')">
+    <button type="button" class="product-button" aria-label="Manage Products" @click="navigateTo('/admin/product')">
       Product: {{ productsCount }}
     </button>
     <button type="button" class="category-button" aria-label="Manage Categories" @click="navigateTo('/admin/category')">
