@@ -10,6 +10,7 @@ const links = [
   { name: 'contacts', label: 'Contacts' },
   { name: 'favorite', label: 'Favorite' },
   { name: 'products', label: 'Products' },
+  { name: 'AdminDashboard', label: 'Admin Area' },
 ];
 
 const isLoggedIn = computed(() => authStore.isLoggedIn);
