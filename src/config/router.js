@@ -10,7 +10,6 @@ import Login from '../pages/Login.vue';
 import NotFound from '../pages/NotFound.vue';
 import Products from '../pages/Products.vue';
 import Register from '../pages/Register.vue';
-import Users from '../pages/Users.vue';
 
 // Navigation guard for protected routes
 import { getCurrentUser, isAuthenticated } from '@/services/authServices';
@@ -25,7 +24,6 @@ const routes = [
   { path: '/register', name: 'register', component: Register },
   { path: '/products', name: 'products', component: Products },
   { path: '/unauthorized', name: 'Unauthorized', component: () => import('../pages/Unauthorized.vue') },
-  { path: '/users', name: 'users', component: Users, meta: { requiresAuth: true } },
   { path: '/details/:id', name: 'details', component: Details, meta: { requiresAuth: true } },
   {
     path: '/admin',
@@ -51,9 +49,22 @@ const routes = [
         ],
       },
       {
-        path: 'create-product',
-        name: 'CreateProduct',
-        component: () => import('@/pages/admin/CreateProduct.vue'),
+        path: 'product',
+        name: 'Product',
+        component: () => import('@/pages/admin/Product.vue'),
+        children: [
+          {
+            path: 'all-products',
+            name: 'AllProducts',
+            component: () => import('@/pages/admin/products/AllProducts.vue'),
+          },
+          {
+            path: 'create-product',
+            name: 'CreateProduct',
+            component: () => import('@/pages/admin/products/CreateProduct.vue'),
+          },
+        ],
+
       },
       {
         path: 'category',
