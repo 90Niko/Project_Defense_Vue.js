@@ -6,7 +6,8 @@
 /* Define color variables for better maintainability */
 h2 {
   text-align: center;
-  margin-top: 1.5rem;
+  margin-top: 0.3rem;
+  margin-bottom: 0.9rem;
   font-size: 2rem;
   font-weight: bold;
   text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);

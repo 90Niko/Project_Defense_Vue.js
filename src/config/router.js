@@ -42,6 +42,13 @@ const routes = [
         path: 'manage-users',
         name: 'ManageUsers',
         component: () => import('@/pages/admin/ManageUsers.vue'),
+        children: [
+          {
+            path: 'all-users',
+            name: 'AllUsers',
+            component: () => import('@/pages/admin/users/AllUsers.vue'),
+          },
+        ],
       },
       {
         path: 'create-product',
