@@ -4,6 +4,7 @@ import { email, maxLength, minLength, numeric, required } from '@vuelidate/valid
 import axios from 'axios';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
 
 export default {
   setup() {
@@ -20,6 +21,7 @@ export default {
     const validationErrors = ref([]);
     const isLoading = ref(false);
     const router = useRouter();
+    const toast = useToast(); // Initialize toast
 
     const rules = {
       firstName: { required, minLength: minLength(3), maxLength: maxLength(15) },
@@ -57,6 +59,7 @@ export default {
       if (!validateForm()) {
         submitted.value = false;
         isLoading.value = false;
+        toast.error('Validation errors found. Please correct them.');
         return;
       }
 
@@ -80,15 +83,17 @@ export default {
 
         console.log('Server Response:', response.data);
         submitted.value = true;
+        toast.success('Registration successful!');
 
         // Redirect to home page after 2 seconds
         setTimeout(() => {
-          router.push('/');
+          router.push('login');
         }, 2000);
       }
       catch (error) {
         console.error('Error submitting form:', error);
         submissionError.value = 'There was an error submitting the form. Please try again later.';
+        toast.error('Failed to submit the form. Please try again.');
       }
       finally {
         isLoading.value = false;

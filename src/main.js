@@ -13,7 +13,7 @@ app.use(pinia);
 app.use(router);
 app.use(Toast, {
   position: POSITION.TOP_RIGHT,
-  timeout: 3000,
+  timeout: 1800,
   closeOnClick: true,
 });
 
