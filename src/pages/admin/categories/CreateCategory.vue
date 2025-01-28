@@ -2,23 +2,19 @@
 import axios from 'axios';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
 
 export default {
   setup() {
     const name = ref(''); // Bind to the input field
     const isLoading = ref(false); // To handle loading state
-    const errorMessage = ref(''); // To handle error messages
-    const successMessage = ref(''); // To display success messages
     const router = useRouter(); // Router instance
+    const toast = useToast(); // Toast instance
 
     const createCategory = async () => {
-      // Reset messages
-      errorMessage.value = '';
-      successMessage.value = '';
-
       // Validate input
       if (!name.value.trim()) {
-        errorMessage.value = 'Name is required.';
+        toast.error('Name is required.');
         return;
       }
 
@@ -34,11 +30,8 @@ export default {
 
         const CheckCategory = existingCategory.data.find(category => category.name === name.value);
 
-        console.log(existingCategory.data);
-        console.log(name.value);
-        console.log(CheckCategory);
         if (CheckCategory) {
-          errorMessage.value = 'Category already exists.';
+          toast.error('Category already exists.');
           return;
         }
 
@@ -52,7 +45,7 @@ export default {
         });
 
         // Handle success
-        successMessage.value = 'Category created successfully!';
+        toast.success('Category created successfully!');
         name.value = ''; // Reset the input field
 
         // Navigate to the admin dashboard
@@ -63,10 +56,10 @@ export default {
       catch (error) {
         // Handle error
         if (error.response && error.response.data && error.response.data.message) {
-          errorMessage.value = error.response.data.message;
+          toast.error(error.response.data.message);
         }
         else {
-          errorMessage.value = 'An error occurred while creating the category.';
+          toast.error('An error occurred while creating the category.');
         }
       }
       finally {
@@ -77,8 +70,6 @@ export default {
     return {
       name,
       isLoading,
-      errorMessage,
-      successMessage,
       createCategory,
     };
   },
@@ -96,12 +87,6 @@ export default {
         Create Category
       </button>
     </form>
-    <div v-if="errorMessage" class="error-message">
-      {{ errorMessage }}
-    </div>
-    <div v-if="successMessage" class="success-message">
-      {{ successMessage }}
-    </div>
   </main>
 </template>
 
@@ -172,19 +157,5 @@ h1 {
 
 .btn:not(:disabled):hover {
   background-color: #0056b3;
-}
-
-.error-message {
-  color: #FF0000;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-  text-align: center;
-}
-
-.success-message {
-  color: #28a745;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-  text-align: center;
 }
 </style>
