@@ -1,8 +1,10 @@
 <script setup>
 import { useAuthStore } from '@/stores/useAuthStore';
 import { computed, ref } from 'vue';
+import { useToast } from 'vue-toastification';
 
 const authStore = useAuthStore();
+const toast = useToast(); // Initialize toast
 
 const links = [
   { name: 'home', label: 'Home' },
@@ -18,6 +20,7 @@ const userName = computed(() => authStore.user?.name || '');
 
 function handleLogout() {
   authStore.logout();
+  toast.success('You have been logged out successfully!'); // Show toast on logout
 }
 
 const isDropdownOpen = ref(false);
@@ -25,6 +28,7 @@ const isDropdownOpen = ref(false);
 function toggleDropdown() {
   isDropdownOpen.value = !isDropdownOpen.value;
 }
+
 function closeDropdown() {
   isDropdownOpen.value = false;
 }

@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification'; // Import toast
 import { useAuthStore } from '../stores/useAuthStore';
 
 const username = ref('');
@@ -10,6 +11,7 @@ const errorMessage = ref(null);
 const authStore = useAuthStore();
 const router = useRouter();
 const isLoading = ref(false);
+const toast = useToast(); // Initialize toast
 
 async function handleLogin() {
   isLoading.value = true;
@@ -21,33 +23,33 @@ async function handleLogin() {
       password: password.value,
     });
 
-    // Ensure role exists in the response
     const { token, role } = response.data;
 
     if (!role) {
-      throw new Error('Role is missing in the response'); // Handle missing role
+      throw new Error('Role is missing in the response');
     }
 
-    // Save token and role securely
     localStorage.setItem('token', token);
     localStorage.setItem('role', role);
 
-    // Call setLoggedIn method in the store
     authStore.setLoggedIn(true, { name: username.value, role });
 
-    // Redirect based on role
+    // Show success toast
+    toast.success('Login successful!');
+
     if (role === 'Admin') {
-      router.push({ name: 'AdminDashboard' }); // Admin dashboard
+      router.push({ name: 'AdminDashboard' });
     }
     else {
-      router.push({ name: 'home' }); // Regular user home
+      router.push({ name: 'home' });
     }
-    console.log('Login successful:', response.data);
-    console.log('Role:', role);
   }
   catch (error) {
     console.error('Error during login:', error);
     errorMessage.value = error.response?.data?.message || 'An error occurred. Please try again.';
+
+    // Show error toast
+    toast.error(errorMessage.value);
   }
   finally {
     isLoading.value = false;
@@ -56,46 +58,57 @@ async function handleLogin() {
 </script>
 
 <template>
-  <progress v-if="isLoading" class="loader-line" />
-  <div class="login-form">
-    <h2 class="form-title">
-      Login
-    </h2>
-    <form @submit.prevent="handleLogin">
-      <div>
-        <label for="username"><img
-          class="form-icon"
-          width="24"
-          height="24"
-          src="https://img.icons8.com/sf-black-filled/24/new-post.png"
-          alt="email"
-        > Email:</label>
-        <input id="username" v-model="username" type="text" required>
-      </div>
-      <div>
-        <label for="password">  <img
-          class="form-icon"
-          width="24"
-          height="24"
-          src="https://img.icons8.com/material-sharp/24/password.png"
-          alt="password"
-        >Password:</label>
-        <input id="password" v-model="password" type="password" required>
-      </div>
-      <button type="submit" :disabled="isLoading">
-        {{ isLoading ? 'Logging in...' : 'Login' }}
-      </button>
-      <p v-if="errorMessage" class="error">
-        {{ errorMessage }}
-      </p>
-    </form>
+  <div>
+    <!-- Loading indicator -->
+    <progress v-if="isLoading" class="loader-line" />
+
+    <!-- Login form -->
+    <div class="login-form">
+      <h2 class="form-title">
+        Login
+      </h2>
+      <form @submit.prevent="handleLogin">
+        <div class="form-group">
+          <label for="username">
+            <img
+              class="form-icon"
+              width="24"
+              height="24"
+              src="https://img.icons8.com/sf-black-filled/24/new-post.png"
+              alt="email"
+            >
+            Email:
+          </label>
+          <input id="username" v-model="username" type="text" required>
+        </div>
+        <div class="form-group">
+          <label for="password">
+            <img
+              class="form-icon"
+              width="24"
+              height="24"
+              src="https://img.icons8.com/material-sharp/24/password.png"
+              alt="password"
+            >
+            Password:
+          </label>
+          <input id="password" v-model="password" type="password" required>
+        </div>
+        <button type="submit" :disabled="isLoading">
+          {{ isLoading ? 'Logging in...' : 'Login' }}
+        </button>
+        <p v-if="errorMessage" class="error">
+          {{ errorMessage }}
+        </p>
+      </form>
+    </div>
   </div>
 </template>
 
 <style scoped>
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f4f8;
   margin: 0;
   padding: 0;
   display: flex;
@@ -106,23 +119,24 @@ body {
 
 .login-form {
   background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
-  padding: 20px;
+  padding: 30px;
   box-sizing: border-box;
   margin: 0 auto;
   margin-top: 100px;
-
 }
+
 .form-title {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
   color: #333333;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
+
 .loader-line {
   height: 4px;
   background-color: #007bff;
@@ -146,7 +160,7 @@ body {
   flex-direction: column;
 }
 
-.login-form div {
+.form-group {
   position: relative;
   margin-bottom: 20px;
 }
@@ -164,10 +178,10 @@ input[type="text"],
 input[type="password"] {
   width: 100%;
   height: 50px;
-  padding: 10px 10px 10px 40px; /* Space for the icon */
-  font-size: 14px;
+  padding: 10px 10px 10px 40px;
+  font-size: 16px;
   border: 1px solid #cccccc;
-  border-radius: 4px;
+  border-radius: 8px;
   box-sizing: border-box;
   background-color: white;
   transition: border-color 0.2s;
@@ -178,18 +192,18 @@ input[type="password"] {
 input[type="text"]:focus,
 input[type="password"]:focus {
   border-color: #007bff;
+  outline: none;
 }
 
-/* Submit Button */
 button {
-  background-color: #555;
+  background-color: #007bff;
   color: #ffffff;
-  padding: 12px;
-  margin-bottom: 5px;
+  padding: 14px;
+  margin-bottom: 10px;
   font-size: 16px;
   font-weight: bold;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
   text-align: center;
@@ -201,28 +215,28 @@ button:disabled {
 }
 
 button:hover:not(:disabled) {
-  background-color: #333;
+  background-color: #0056b3;
 }
 
-/* Error Message */
 .error {
   font-size: 14px;
   color: #dc3545;
   text-align: center;
+  margin-top: 10px;
 }
 
 /* Responsive Design */
 @media (max-width: 480px) {
   .login-form {
-    padding: 15px;
+    padding: 20px;
   }
 
-  .login-form h2 {
-    font-size: 20px;
+  .form-title {
+    font-size: 24px;
   }
 
   button {
-    padding: 10px;
+    padding: 12px;
     font-size: 14px;
   }
 }
