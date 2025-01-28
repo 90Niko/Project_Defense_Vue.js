@@ -1,12 +1,14 @@
 <script>
 import axios from 'axios';
 import { inject, onMounted, ref } from 'vue';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: 'AllCategory',
   setup() {
     const categories = ref([]);
     const $modal = inject('$modal'); // Inject modal if available
+    const toast = useToast(); // Initialize toast
 
     const fetchCategories = async () => {
       try {
@@ -15,7 +17,7 @@ export default {
       }
       catch (error) {
         console.error('Error fetching categories:', error);
-        this.alert('Failed to load categories. Please try again later.');
+        toast.error('Failed to load categories. Please try again later.'); // Toast error message
       }
     };
 
@@ -43,11 +45,11 @@ export default {
         try {
           await axios.delete(`http://localhost:5084/api/Category/${id}`);
           categories.value = categories.value.filter(category => category.id !== id);
-          this.alert('Category deleted successfully!');
+          toast.success('Category deleted successfully!'); // Toast success message
         }
         catch (error) {
           console.error('Error deleting category:', error);
-          this.alert('Failed to delete category. Please try again later.');
+          toast.error('Failed to delete category. Please try again later.'); // Toast error message
         }
       }
     };
@@ -63,8 +65,9 @@ export default {
 </script>
 
 <template>
-  <div>
-    <table>
+  <div class="container">
+    <h1>Categories</h1>
+    <table class="category-table">
       <thead>
         <tr>
           <th>ID</th>
@@ -77,7 +80,7 @@ export default {
           <td>{{ category.id }}</td>
           <td>{{ category.name }}</td>
           <td>
-            <button @click="deleteCategory(category.id)">
+            <button class="delete-btn" @click="deleteCategory(category.id)">
               Delete
             </button>
           </td>
@@ -88,19 +91,54 @@ export default {
 </template>
 
 <style scoped>
-table {
+.container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.category-table {
   width: 100%;
   border-collapse: collapse;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-th,
-td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-th {
-  background-color: #f4f4f4;
+.category-table th,
+.category-table td {
+  border: 1px solid #e0e0e0;
+  padding: 12px;
   text-align: left;
+}
+
+.category-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+}
+
+.category-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.delete-btn {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+  background-color: #ff7875;
 }
 </style>

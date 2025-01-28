@@ -44,7 +44,7 @@ export default {
 </script>
 
 <template>
-  <div class="category-container">
+  <div class="manage-users-container">
     <div class="search-container">
       <input
         v-model="searchQuery"
@@ -63,63 +63,61 @@ export default {
 </template>
 
 <style scoped>
-.category-container {
-  background-color: #f9f9f9;
-  margin-bottom: auto;
-}
-
-.title {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
-.navigation {
-  margin-bottom: 30px;
-}
-
-.nav-link {
-  display: inline-block;
-  padding: 10px 20px;
-  margin: 0 10px;
-  text-decoration: none;
-  color: white;
-  background-color: #007bff;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-.nav-link:hover {
-  background-color: #0056b3;
+.manage-users-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .search-container {
-  margin-bottom: 0 ;
+  margin-bottom: 20px;
 }
 
 .search-input {
   width: 100%;
   max-width: 400px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
   font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+  outline: none;
 }
 
 .user-list {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .user-item {
   margin-bottom: 15px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #fff;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .user-item p {
   margin: 5px 0;
+  color: #333;
+}
+
+.user-item p strong {
+  color: #007bff;
 }
 </style>
