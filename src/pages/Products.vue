@@ -1,10 +1,10 @@
 <script>
-import { useAuthStore } from '@/stores/useAuthStore'; // Import auth store
-import { useDetailsStore } from '@/stores/useDetailsStore'; // Details store
-import { useFavoriteStore } from '@/stores/useFavoriteStore'; // Favorite store
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useDetailsStore } from '@/stores/useDetailsStore';
+import { useFavoriteStore } from '@/stores/useFavoriteStore';
+import axios from 'axios'; // Use axios directly
 import { computed, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router'; // Import router for navigation
-import { fetchProducts } from '../services/productsServices';
+import { useRouter } from 'vue-router';
 
 export default {
   name: 'ProductList',
@@ -15,18 +15,17 @@ export default {
     const itemsPerPage = 4;
     const isLoading = ref(false);
 
-    // Use stores
+    // Stores
     const favoriteStore = useFavoriteStore();
     const authStore = useAuthStore();
     const detailsStore = useDetailsStore();
-    const router = useRouter(); // Access Vue Router
+    const router = useRouter();
 
     // Computed properties
-    const totalPages = computed(() => Math.ceil(products.value.length / itemsPerPage));
+    const totalPages = computed(() => Math.ceil(products.value.length / itemsPerPage) || 1);
     const paginatedProducts = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      return products.value.slice(start, end);
+      return products.value.slice(start, start + itemsPerPage);
     });
 
     // Favorite functionality
@@ -38,22 +37,27 @@ export default {
       return favoriteStore.isFavorite(product);
     };
 
-    const removeFavorite = (product) => {
-      favoriteStore.removeFavorite(product);
-    };
-
-    // Set product details and redirect
+    // View product details
     const viewDetails = (product) => {
-      detailsStore.setProduct(product); // Set the selected product in the details store
-      router.push(`/details/${product.id}`); // Navigate to the Details page
+      detailsStore.setProduct(product);
+      router.push(`/details/${product.id}`);
+    };
+    const getImageUrl = (imagePath) => {
+      if (!imagePath)
+        return '/default-product.png'; // ✅ Fallback image
+
+      // ✅ Ensure full image URL
+      return `http://localhost:5084${imagePath}`;
     };
 
-    // Fetch products
+    // Fetch products from API
     const loadProducts = async () => {
       isLoading.value = true;
       try {
-        const data = await fetchProducts(); // Fetch data directly
-        products.value = data; // Assign the fetched data
+        const response = await axios.get('http://localhost:5084/api/Product/getAll');
+        products.value = response.data; // Set the products array with API data
+
+        console.log('Products:', products.value);
       }
       catch (error) {
         console.error('Error fetching products:', error);
@@ -87,12 +91,12 @@ export default {
       isLoading,
       toggleFavorite,
       isFavorite,
-      removeFavorite,
       viewDetails,
       nextPage,
       previousPage,
-      loadProducts,
-      isLoggedIn: authStore.isLoggedIn,
+      isLoggedIn: computed(() => authStore.isLoggedIn),
+      getImageUrl,
+      // Ensure reactivity
     };
   },
 };
@@ -103,45 +107,30 @@ export default {
   <div class="products">
     <h1>Products</h1>
     <ul class="product-list">
-      <li
-        v-for="product in paginatedProducts"
-        :key="product.id"
-        class="product-item"
-      >
+      <li v-for="product in paginatedProducts" :key="product.id" class="product-item">
         <article class="product-card">
           <div class="product-image-container">
-            <img
-              :src="product.image"
-              :alt="product.title"
-              class="product-image"
-            >
+            <img :src="getImageUrl(product.imagePath)" :alt="product.name" class="product-image">
           </div>
           <div class="product-details">
             <h2 class="product-name">
-              {{ product.title }}
+              {{ product.name }}
             </h2>
           </div>
           <p class="product-price">
             $ {{ product.price }}
           </p>
           <div class="btn">
-            <!-- Conditionally Render Buttons -->
             <button
               v-if="isLoggedIn"
               class="favorite-button"
               :class="{ 'favorite-active': isFavorite(product) }"
-              @click="isFavorite(product) ? removeFavorite(product) : toggleFavorite(product)"
+              @click="toggleFavorite(product)"
             >
-              <i
-                :class="isFavorite(product) ? 'bi bi-x-circle' : 'bi bi-star'"
-              />
+              <i :class="isFavorite(product) ? 'bi bi-x-circle' : 'bi bi-star'" />
               {{ isFavorite(product) ? 'Remove' : 'Favorite' }}
             </button>
-            <button
-              v-else
-              class="details-button"
-              @click="viewDetails(product)"
-            >
+            <button v-else class="details-button" @click="viewDetails(product)">
               <i class="bi bi-info-circle" />
               Details
             </button>
@@ -149,7 +138,8 @@ export default {
         </article>
       </li>
     </ul>
-    <footer v-if="!isLoading" class="pagination-container">
+
+    <footer v-if="!isLoading && totalPages > 1" class="pagination-container">
       <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
         Previous
       </button>
