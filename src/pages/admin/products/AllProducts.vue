@@ -182,7 +182,7 @@ export default {
               {{ product.categoryName }}
             </td>
             <td data-label="Created On">
-              {{ dayjs(product.createdOn).format('MMMM D, YYYY') }}
+              {{ dayjs(product.createdOn).format('ddd, MMM D, YYYY h:mm A') }}
             </td>
             <td data-label="Actions">
               <button class="details-button" @click="editProduct(product.id)">

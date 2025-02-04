@@ -27,6 +27,14 @@ export default {
       }
     };
 
+    const getImageUrl = (imagePath) => {
+      if (!imagePath)
+        return '/default-product.png'; // ✅ Fallback image
+
+      // ✅ Ensure full image URL
+      return imagePath.startsWith('http') ? imagePath : `http://localhost:5084/${imagePath}`;
+    };
+
     // Reset the isRemoved flag to false to "restore" the product
     const resetRemovedFlag = () => {
       favoriteStore.isRemoved = false;
@@ -37,7 +45,8 @@ export default {
       removeFavorite, // Method to remove a product
       resetRemovedFlag, // Method to reset removal state
       isLoggedIn: authStore.isLoggedIn, // Reactive property for login status
-      redirectToLogin, // Method to redirect to Login
+      redirectToLogin,
+      getImageUrl, // Method to redirect to Login
     };
   },
 };
@@ -48,7 +57,7 @@ export default {
     <h1>Your Favorites</h1>
     <!-- Show message and login button if the user is not logged in -->
     <div v-if="!isLoggedIn" class="login-prompt">
-      <p>You must log in to view the users list.</p>
+      <p>You must log in to view the favorite.</p>
       <button class="login-button" @click="redirectToLogin">
         Log In
       </button>
@@ -57,7 +66,7 @@ export default {
     <ul v-if="isLoggedIn && favorites.length > 0" class="favorite-list">
       <li v-for="product in favorites" :key="product.id" class="favorite-item">
         <div class="favorite-product">
-          <img :src="product.image" :alt="product.title" class="favorite-image">
+          <img :src="getImageUrl(product.imagePath)" :alt="product.name" class="favorite-image">
           <div class="favorite-details">
             <h2>{{ product.title }}</h2>
             <p>$ {{ product.price }}</p>
