@@ -1,6 +1,6 @@
 <script>
 import axios from 'axios';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 export default {
   setup() {
@@ -12,8 +12,25 @@ export default {
       imageFile: null, // Stores the selected file
     });
 
+    const categories = ref([]);
     const successMessage = ref('');
     const errorMessage = ref('');
+
+    // Fetch categories from the API
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('http://localhost:5084/api/Category/getAll');
+        categories.value = response.data;
+      }
+      catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    // Call fetchCategories when the component is mounted
+    onMounted(() => {
+      fetchCategories();
+    });
 
     // Handle file selection
     const handleFileUpload = (event) => {
@@ -33,11 +50,15 @@ export default {
           formData.append('ImageFile', product.value.imageFile);
         }
 
-        const response = await axios.post('http://localhost:5084/api/Product/create', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
+        const response = await axios.post(
+          'http://localhost:5084/api/Product/create',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
           },
-        });
+        );
 
         successMessage.value = 'Product created successfully!';
         errorMessage.value = '';
@@ -61,6 +82,7 @@ export default {
 
     return {
       product,
+      categories,
       successMessage,
       errorMessage,
       handleFileUpload,
@@ -73,26 +95,36 @@ export default {
 <template>
   <div class="container">
     <h2>Create Product</h2>
-
     <form @submit.prevent="submitProduct">
       <div>
         <label>Product Name:</label>
-        <input v-model="product.name" type="text" required>
+        <input v-model="product.name" type="text" required placeholder="Enter product name...">
       </div>
 
       <div>
         <label>Price:</label>
-        <input v-model="product.price" type="number" required>
+        <input v-model="product.price" required placeholder="Enter product price...">
       </div>
 
       <div>
         <label>Description:</label>
-        <textarea v-model="product.description" required />
+        <textarea v-model="product.description" required placeholder="Enter prodct description" />
       </div>
 
       <div>
-        <label>Category ID:</label>
-        <input v-model="product.categoryId" type="number" required>
+        <label>Category:</label>
+        <select v-model="product.categoryId" required>
+          <option disabled value="">
+            Please select a category
+          </option>
+          <option
+            v-for="category in categories"
+            :key="category.id"
+            :value="category.id"
+          >
+            {{ category.name }}
+          </option>
+        </select>
       </div>
 
       <div>
@@ -127,10 +159,11 @@ label {
   display: block;
   margin-top: 10px;
 }
-input, textarea {
+input, textarea, select {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
+  box-sizing: border-box;
 }
 button {
   margin-top: 15px;

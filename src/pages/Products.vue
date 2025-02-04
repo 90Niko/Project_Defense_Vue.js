@@ -47,7 +47,7 @@ export default {
         return '/default-product.png'; // ✅ Fallback image
 
       // ✅ Ensure full image URL
-      return `http://localhost:5084${imagePath}`;
+      return imagePath.startsWith('http') ? imagePath : `http://localhost:5084/${imagePath}`;
     };
 
     // Fetch products from API
@@ -80,7 +80,6 @@ export default {
       }
     };
 
-    // Fetch products on component mount
     onMounted(loadProducts);
 
     return {
@@ -96,7 +95,6 @@ export default {
       previousPage,
       isLoggedIn: computed(() => authStore.isLoggedIn),
       getImageUrl,
-      // Ensure reactivity
     };
   },
 };
