@@ -1,7 +1,7 @@
 <script>
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useToast } from 'vue-toastification';
 
 export default {
@@ -12,7 +12,43 @@ export default {
     const errorMessage = ref('');
     const toast = useToast();
 
-    // Fetch products
+    // Sorting state
+    const sortBy = ref(''); // options: '', 'date', 'price', 'category'
+    const sortOrder = ref('asc'); // 'asc' or 'desc'
+
+    // Toggle sort order between ascending and descending
+    const toggleSortOrder = () => {
+      sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+    };
+
+    // Computed sorted products based on sortBy and sortOrder
+    const sortedProducts = computed(() => {
+      if (!sortBy.value) {
+        return products.value;
+      }
+      return [...products.value].sort((a, b) => {
+        let aValue, bValue;
+        if (sortBy.value === 'date') {
+          aValue = new Date(a.createdOn);
+          bValue = new Date(b.createdOn);
+        }
+        else if (sortBy.value === 'price') {
+          aValue = a.price;
+          bValue = b.price;
+        }
+        else if (sortBy.value === 'category') {
+          aValue = a.categoryName.toLowerCase();
+          bValue = b.categoryName.toLowerCase();
+        }
+        if (aValue < bValue)
+          return sortOrder.value === 'asc' ? -1 : 1;
+        if (aValue > bValue)
+          return sortOrder.value === 'asc' ? 1 : -1;
+        return 0;
+      });
+    });
+
+    // Fetch products from API
     const fetchProducts = async () => {
       try {
         const response = await axios.get('http://localhost:5084/api/Product/getAll');
@@ -33,7 +69,6 @@ export default {
     const deleteProduct = async (id) => {
       try {
         await axios.delete(`http://localhost:5084/api/Product/delete/${id}`);
-        // Remove the deleted product from the list
         products.value = products.value.filter(product => product.id !== id);
         toast.success('Product deleted successfully!');
       }
@@ -48,7 +83,7 @@ export default {
     const editProduct = (id) => {
       console.log('Edit product with ID:', id);
       toast.info(`Edit product with ID: ${id}`);
-      // Implement your edit logic here (e.g., redirect to an edit page or open a modal)
+      // Implement your edit logic here
     };
 
     onMounted(() => {
@@ -62,6 +97,10 @@ export default {
       dayjs,
       deleteProduct,
       editProduct,
+      sortBy,
+      sortOrder,
+      toggleSortOrder,
+      sortedProducts,
     };
   },
 };
@@ -72,6 +111,29 @@ export default {
     <h1 class="title">
       Product List
     </h1>
+
+    <!-- Sorting Controls -->
+    <div v-if="products.length" class="sort-controls">
+      <label for="sortField">Sort by:</label>
+      <select id="sortField" v-model="sortBy">
+        <option value="">
+          None
+        </option>
+        <option value="date">
+          Date
+        </option>
+        <option value="price">
+          Price
+        </option>
+        <option value="category">
+          Category
+        </option>
+      </select>
+      <button class="sort-order-button" @click="toggleSortOrder">
+        Order: {{ sortOrder === 'asc' ? 'Ascending' : 'Descending' }}
+      </button>
+    </div>
+
     <div v-if="isLoading" class="loading-message">
       Loading products...
     </div>
@@ -81,41 +143,67 @@ export default {
     <div v-else-if="products.length === 0" class="no-products-message">
       No products available.
     </div>
-    <table v-else class="product-table">
-      <thead>
-        <tr>
-          <th>Id</th>
-          <th>Product Name</th>
-          <th>Price</th>
-          <th>Description</th>
-          <th>Category</th>
-          <th>Created On</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="product in products" :key="product.id">
-          <td>{{ product.id }}</td>
-          <td>{{ product.name }}</td>
-          <td>${{ product.price }}</td>
-          <td>{{ product.description }}</td>
-          <td>{{ product.categoryName }}</td>
-          <td>{{ dayjs(product.createdOn).format('MMMM D, YYYY') }}</td>
-          <td>
-            <button class="edit-button" @click="editProduct(product.id)">
-              Edit
-            </button>
-            <button class="delete-button" @click="deleteProduct(product.id)">
-              Delete
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+
+    <!-- Responsive Table Wrapper -->
+    <div v-else class="table-responsive">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Product Name</th>
+            <th @click="sortBy = 'price'; toggleSortOrder()">
+              Price
+            </th>
+            <th>Description</th>
+            <th @click="sortBy = 'category'; toggleSortOrder()">
+              Category
+            </th>
+            <th @click="sortBy = 'date'; toggleSortOrder()">
+              Created On
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="product in sortedProducts" :key="product.id">
+            <td data-label="Id">
+              {{ product.id }}
+            </td>
+            <td data-label="Product Name">
+              {{ product.name }}
+            </td>
+            <td data-label="Price">
+              ${{ product.price }}
+            </td>
+            <td data-label="Description">
+              {{ product.description }}
+            </td>
+            <td data-label="Category">
+              {{ product.categoryName }}
+            </td>
+            <td data-label="Created On">
+              {{ dayjs(product.createdOn).format('MMMM D, YYYY') }}
+            </td>
+            <td data-label="Actions">
+              <button class="details-button" @click="editProduct(product.id)">
+                Details
+              </button>
+              <button class="edit-button" @click="editProduct(product.id)">
+                Edit
+              </button>
+              <button class="delete-button" @click="deleteProduct(product.id)">
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <style scoped>
+/* Base Styles */
 .product-container {
   padding: 20px;
   background-color: #f9f9f9;
@@ -138,8 +226,45 @@ export default {
   margin: 20px 0;
 }
 
+/* Sorting Controls */
+.sort-controls {
+  text-align: center;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sort-controls label {
+  font-weight: bold;
+}
+
+.sort-controls select {
+  padding: 5px;
+}
+
+.sort-order-button {
+  padding: 5px 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Responsive Table Wrapper */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Enables smooth scrolling on iOS */
+}
+
+/* Table Styling */
 .product-table {
   width: 100%;
+  min-width: 800px; /* Set a min-width to force horizontal scrolling on smaller screens */
   border-collapse: collapse;
   margin-top: 20px;
   background-color: #fff;
@@ -157,6 +282,7 @@ export default {
   background-color: #007bff;
   color: white;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .product-table tr:nth-child(even) {
@@ -167,26 +293,36 @@ export default {
   background-color: #f1f1f1;
 }
 
-/* Center buttons in the table cell */
 .product-table td:last-child {
-  text-align: center; /* Center buttons horizontally */
+  text-align: center;
 }
 
+/* Buttons */
 .edit-button,
-.delete-button {
-  width: 80px; /* Fixed width for both buttons */
-  padding: 8px 0; /* Adjust padding for consistent height */
+.delete-button,
+.details-button {
+  width: 80px;
+  padding: 8px 0;
   margin: 0 5px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  text-align: center; /* Center text inside the button */
+  text-align: center;
 }
 
 .edit-button {
   background-color: #4caf50;
   color: white;
+}
+
+.details-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.details-button:hover {
+  background-color: #0056b3;
 }
 
 .edit-button:hover {
@@ -200,5 +336,23 @@ export default {
 
 .delete-button:hover {
   background-color: #e53935;
+}
+
+/* Responsive Adjustments for Smaller Screens */
+@media (max-width: 680px) {
+  .product-table th,
+  .product-table td {
+    padding: 8px 10px;
+  }
+
+  .sort-controls {
+    flex-direction: column;
+  }
+
+  .sort-controls label,
+  .sort-controls select,
+  .sort-order-button {
+    margin-bottom: 10px;
+  }
 }
 </style>
