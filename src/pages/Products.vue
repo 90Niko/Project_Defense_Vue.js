@@ -1,5 +1,6 @@
 <script>
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useCartStore } from '@/stores/useCartStore'; // Import your cart store
 import { useDetailsStore } from '@/stores/useDetailsStore';
 import { useFavoriteStore } from '@/stores/useFavoriteStore';
 import axios from 'axios'; // Use axios directly
@@ -19,6 +20,7 @@ export default {
     const favoriteStore = useFavoriteStore();
     const authStore = useAuthStore();
     const detailsStore = useDetailsStore();
+    const cartStore = useCartStore(); // Use the cart store
     const router = useRouter();
 
     // Computed properties
@@ -37,11 +39,27 @@ export default {
       return favoriteStore.isFavorite(product);
     };
 
+    // Cart functionality
+    const isInCart = (product) => {
+      // Assuming your cart store has a `cartItems` array
+      return cartStore.cartItems.some(item => item.id === product.id);
+    };
+
+    const toggleCart = (product) => {
+      if (isInCart(product)) {
+        cartStore.removeProduct(product);
+      }
+      else {
+        cartStore.addProduct(product);
+      }
+    };
+
     // View product details
     const viewDetails = (product) => {
       detailsStore.setProduct(product);
       router.push(`/details/${product.id}`);
     };
+
     const getImageUrl = (imagePath) => {
       if (!imagePath)
         return '/default-product.png'; // ✅ Fallback image
@@ -56,7 +74,6 @@ export default {
       try {
         const response = await axios.get('http://localhost:5084/api/Product/getAll');
         products.value = response.data; // Set the products array with API data
-
         console.log('Products:', products.value);
       }
       catch (error) {
@@ -90,6 +107,8 @@ export default {
       isLoading,
       toggleFavorite,
       isFavorite,
+      toggleCart,
+      isInCart,
       viewDetails,
       nextPage,
       previousPage,
@@ -119,6 +138,17 @@ export default {
             $ {{ product.price }}
           </p>
           <div class="btn">
+            <!-- Cart Button -->
+            <button
+              class="cart-button"
+              :class="{ 'in-cart': isInCart(product) }"
+              @click="toggleCart(product)"
+            >
+              <i class="bi" :class="isInCart(product) ? 'bi-cart-dash' : 'bi-cart-plus'" />
+              {{ isInCart(product) ? 'Remove' : 'Add to Cart' }}
+            </button>
+
+            <!-- Favorite / Details Button -->
             <button
               v-if="isLoggedIn"
               class="favorite-button"
@@ -126,7 +156,6 @@ export default {
               @click="toggleFavorite(product)"
             >
               <i :class="isFavorite(product) ? 'bi bi-x-circle' : 'bi bi-star'" />
-              {{ isFavorite(product) ? 'Remove' : 'Favorite' }}
             </button>
             <button v-else class="details-button" @click="viewDetails(product)">
               <i class="bi bi-info-circle" />
@@ -150,24 +179,7 @@ export default {
 </template>
 
 <style>
-.favorite-button {
-  background-color: #ddd;
-  color: #333;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.favorite-button.favorite-active {
-  background-color: #ffcc00;
-  color: #fff;
-}
-
-.favorite-button i {
-  margin-right: 5px;
-}
+/* Loader */
 .loader-line {
   width: 100%;
   height: 3px;
@@ -177,7 +189,6 @@ export default {
   margin: 0 auto;
   border-radius: 20px;
 }
-
 .loader-line:before {
   content: "";
   position: absolute;
@@ -188,22 +199,23 @@ export default {
   animation: lineAnim 1s linear infinite;
   border-radius: 20px;
 }
+
+/* Products container */
 .products {
   max-width: 1200px;
   margin: 0 auto;
   padding-bottom: 40px;
   font-family: Arial, sans-serif;
   text-align: center;
-
 }
-
-h1{
+h1 {
   font-size: 2.5rem;
   margin-bottom: 120px;
   padding-bottom: 20px;
   color: #333;
 }
 
+/* Product list grid */
 .product-list {
   list-style-type: none;
   padding: 0;
@@ -211,12 +223,12 @@ h1{
   grid-template-columns: repeat(4, 1fr); /* Four items per row */
   gap: 20px;
 }
-
 .product-item {
   display: flex;
   justify-content: center;
 }
 
+/* Product card */
 .product-card {
   width: 100%;
   max-width: 280px;
@@ -231,12 +243,12 @@ h1{
   flex-direction: column; /* Vertical layout */
   justify-content: space-between; /* Space out content */
 }
-
 .product-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
+/* Image container */
 .product-image-container {
   background-color: #f9f9f9;
   padding: 10px;
@@ -245,19 +257,18 @@ h1{
   align-items: center;
   justify-content: center;
 }
-
 .product-image {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
 }
 
+/* Product details */
 .product-details {
   padding: 10px;
   text-align: left;
   flex-grow: 1; /* Ensures details expand to fill space */
 }
-
 .product-name {
   font-size: 1rem;
   font-weight: bold;
@@ -265,26 +276,82 @@ h1{
   color: #333;
   text-align: center;
 }
-
-.product-description {
-  font-size: 0.85rem;
-  color: #666;
-  line-height: 1.4;
-  height: 45px; /* Smaller height for truncated description */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 10px;
-  text-align: justify;
-}
-
 .product-price {
   font-size: 1rem;
   font-weight: bold;
   color: #007BFF;
   text-align: center;
   margin-top: auto; /* Pushes the price to the bottom */
-  padding-bottom: 10px; /* Add space between price and bottom of the card */
+  padding-bottom: 10px; /* Space between price and bottom of the card */
 }
+
+/* Button container */
+.btn {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px;
+}
+
+/* Favorite button */
+.favorite-button {
+  background-color: #ddd;
+  color: #333;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.favorite-button.favorite-active {
+  background-color: #ffcc00;
+  color: #fff;
+}
+.favorite-button i {
+  margin-right: 5px;
+}
+
+/* Details button */
+.details-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.details-button:hover {
+  background-color: #0056b3;
+}
+.details-button i {
+  margin-right: 5px;
+}
+
+/* Cart button */
+.cart-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.cart-button:hover {
+  background-color: #218838;
+}
+.cart-button.in-cart {
+  background-color: #dc3545;
+}
+.cart-button.in-cart:hover {
+  background-color: #c82333;
+}
+.cart-button i {
+  margin-right: 5px;
+}
+
+/* Pagination */
 .pagination-container {
   display: flex;
   justify-content: center;
@@ -292,7 +359,6 @@ h1{
   gap: 10px;
   padding: 10px;
 }
-
 .pagination-button {
   padding: 8px 16px;
   font-size: 18px;
@@ -304,33 +370,19 @@ h1{
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 .pagination-button:disabled {
   cursor: not-allowed;
   color: #aaa;
   border-color: #ddd;
 }
-
 .pagination-button:not(:disabled):hover {
   background-color: #007bff;
   color: #fff;
   border-color: #007bff;
 }
-
 .pagination-info {
   font-size: 14px;
   color: #555;
-}
-
-@media (max-width: 768px) {
-  .pagination button {
-    padding: 8px 15px;
-    font-size: 0.9rem;
-  }
-
-  .pagination span {
-    font-size: 1rem;
-  }
 }
 
 /* Responsive Design */
@@ -339,48 +391,14 @@ h1{
     grid-template-columns: repeat(3, 1fr); /* Three items per row */
   }
 }
-
 @media (max-width: 768px) {
   .product-list {
     grid-template-columns: repeat(2, 1fr); /* Two items per row */
   }
 }
-
 @media (max-width: 480px) {
   .product-list {
     grid-template-columns: 1fr; /* One item per row */
   }
-}
-.favorite-button {
-  background-color: #ddd;
-  color: #333;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.favorite-button.favorite-active {
-  background-color: #ffcc00;
-  color: #fff;
-}
-
-.details-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.details-button:hover {
-  background-color: #0056b3;
-}
-
-.favorite-button i, .details-button i {
-  margin-right: 5px;
 }
 </style>

@@ -1,10 +1,11 @@
 <script setup>
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useCartStore } from '@/stores/useCartStore';
 import { computed, ref } from 'vue';
 import { useToast } from 'vue-toastification';
 
 const authStore = useAuthStore();
-const toast = useToast(); // Initialize toast
+const toast = useToast();
 
 const links = [
   { name: 'home', label: 'Home' },
@@ -12,15 +13,21 @@ const links = [
   { name: 'contacts', label: 'Contacts' },
   { name: 'favorite', label: 'Favorite' },
   { name: 'products', label: 'Products' },
-  { name: 'AdminDashboard', label: 'Admin Area' },
 ];
 
 const isLoggedIn = computed(() => authStore.isLoggedIn);
 const userName = computed(() => authStore.user?.name || '');
+const isAdmin = computed(() => authStore.user?.role === 'Admin');
+
+// Directly get the cart store instance.
+const cartStore = useCartStore();
+
+// Create a computed property that returns the number of items in the cart.
+const cartCount = computed(() => cartStore.cartItems.length);
 
 function handleLogout() {
   authStore.logout();
-  toast.success('You have been logged out successfully!'); // Show toast on logout
+  toast.success('You have been logged out successfully!');
 }
 
 const isDropdownOpen = ref(false);
@@ -48,10 +55,22 @@ function closeDropdown() {
           {{ link.label }}
         </router-link>
       </li>
+      <li v-if="isAdmin" class="navbar" @click="closeDropdown">
+        <router-link :to="{ name: 'AdminDashboard' }">
+          Admin Area
+        </router-link>
+      </li>
     </ul>
     <ul class="auth-links">
       <li v-if="isLoggedIn">
         Welcome, {{ userName }}
+      </li>
+      <li v-if="isLoggedIn">
+        <button class="cart">
+          <router-link :to="{ name: 'cart' }">
+            🛒 Cart ({{ cartCount }})
+          </router-link>
+        </button>
       </li>
       <li v-if="isLoggedIn">
         <button class="logout" @click="handleLogout">
@@ -108,7 +127,6 @@ nav {
 }
 
 .main-links.open {
-
   display: flex;
   flex-direction: column;
   position: absolute;
