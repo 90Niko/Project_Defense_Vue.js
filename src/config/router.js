@@ -31,13 +31,13 @@ const routes = [
     path: '/admin',
     name: 'Admin',
     meta: { requiresAdmin: true },
-    component: () => import('@/layouts/AdminLayout.vue'),
     children: [
       {
         path: 'dashboard',
         name: 'AdminDashboard',
         component: () => import('@/pages/admin/AdminDashboard.vue'),
       },
+      { path: 'mermaidDiagram', name: 'mermaidDiagram', component: () => import('@/pages/admin/MermaidDiagram.vue') },
       {
         path: 'manage-users',
         name: 'ManageUsers',
