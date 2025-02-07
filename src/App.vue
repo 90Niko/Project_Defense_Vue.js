@@ -29,8 +29,4 @@ export default {
   background-repeat: no-repeat;
   background-position: center;
 }
-
-.main-content {
-  padding: 0.6rem;
-}
 </style>

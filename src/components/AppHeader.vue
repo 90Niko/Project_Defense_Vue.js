@@ -23,7 +23,7 @@ const isAdmin = computed(() => authStore.user?.role === 'Admin');
 const cartStore = useCartStore();
 
 // Create a computed property that returns the number of items in the cart.
-const cartCount = computed(() => cartStore.cartItems.length);
+const cartCount = computed(() => cartStore.totalItems);
 
 function handleLogout() {
   authStore.logout();
@@ -68,10 +68,11 @@ function closeDropdown() {
       <li v-if="isLoggedIn">
         <button class="cart">
           <router-link :to="{ name: 'cart' }">
-            🛒 Cart ({{ cartCount }})
+            🛒 Cart <span v-if="cartCount > 0">({{ cartCount }})</span>
           </router-link>
         </button>
       </li>
+
       <li v-if="isLoggedIn">
         <button class="logout" @click="handleLogout">
           Logout
@@ -117,7 +118,14 @@ nav {
   padding: 0rem 1rem;
   position: relative;
 }
-
+.cart {
+  background-color: #333;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  text-decoration: underline;
+}
 .main-links {
   list-style: none;
   display: flex;
