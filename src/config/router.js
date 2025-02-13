@@ -13,6 +13,7 @@ import Register from '../pages/Register.vue';
 
 // Navigation guard for protected routes
 import { getCurrentUser, isAuthenticated } from '@/services/authServices';
+import Address from '../pages/Address.vue';
 import Cart from '../pages/Cart.vue';
 
 // Route Configuration
@@ -25,6 +26,7 @@ const routes = [
   { path: '/login', name: 'login', component: Login },
   { path: '/register', name: 'register', component: Register },
   { path: '/products', name: 'products', component: Products },
+  { path: '/address', name: 'address', component: Address, meta: { requiresAuth: true } },
   { path: '/unauthorized', name: 'Unauthorized', component: () => import('../pages/Unauthorized.vue') },
   { path: '/details/:id', name: 'details', component: Details, meta: { requiresAuth: true } },
   {
