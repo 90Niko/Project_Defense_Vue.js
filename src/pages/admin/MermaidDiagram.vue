@@ -19,74 +19,74 @@ export default {
     },
   },
   setup(props) {
-    // For demonstration, we use a target value of 100.
-    // You can change this value or pass it as a prop.
+    // Define your target value.
     const target = 100;
 
     // --- User Diagram ---
     const userDiagramDefinition = computed(() => {
       const achieved = props.userCount;
-      // If achieved exceeds the target, remaining is 0.
       const remaining = achieved >= target ? 0 : target - achieved;
+      // Set pie1 to #ffc107 and pie2 to dark grey (#343a40).
       return `
-  pie
-    title Users
-    "Achieved" : ${achieved}
-    "Remaining" : ${remaining}
-        `;
+%%{init: {"themeVariables": {"pie1": "#ffc107", "pie2": "#2c3e50"}}}%%
+pie
+  title Users
+  "Achieved": ${achieved}
+  "Remaining": ${remaining}
+      `;
     });
     const userDiagramHtml = computed(() => {
-      return `<div class="mermaid">
-  ${userDiagramDefinition.value}
-  </div>`;
+      return `<div class="mermaid user">
+${userDiagramDefinition.value}
+</div>`;
     });
 
     // --- Product Diagram ---
     const productDiagramDefinition = computed(() => {
       const achieved = props.productCount;
       const remaining = achieved >= target ? 0 : target - achieved;
+      // Set pie1 to #007bff and pie2 to dark grey (#343a40).
       return `
-  pie
-    title Products
-    "Achieved" : ${achieved}
-    "Remaining" : ${remaining}
-        `;
+%%{init: {"themeVariables": {"pie1": "#007bff", "pie2": "#2c3e50"}}}%%
+pie
+  title Products
+  "Achieved": ${achieved}
+  "Remaining": ${remaining}
+      `;
     });
     const productDiagramHtml = computed(() => {
-      return `<div class="mermaid">
-  ${productDiagramDefinition.value}
-  </div>`;
+      return `<div class="mermaid product">
+${productDiagramDefinition.value}
+</div>`;
     });
 
     // --- Category Diagram ---
     const categoryDiagramDefinition = computed(() => {
       const achieved = props.categoryCount;
       const remaining = achieved >= target ? 0 : target - achieved;
+      // Set pie1 to #28a745 and pie2 to dark grey (#343a40).
       return `
-  pie
-    title Categories
-    "Achieved" : ${achieved}
-    "Remaining" : ${remaining}
-        `;
+%%{init: {"themeVariables": {"pie1": "#28a745", "pie2": "#2c3e50"}}}%%
+pie
+  title Categories
+  "Achieved": ${achieved}
+  "Remaining": ${remaining}
+      `;
     });
     const categoryDiagramHtml = computed(() => {
-      return `<div class="mermaid">
-  ${categoryDiagramDefinition.value}
-  </div>`;
+      return `<div class="mermaid category">
+${categoryDiagramDefinition.value}
+</div>`;
     });
 
-    // Function to render (or re-render) the diagrams.
+    // Function to render or re-render the diagrams.
     const renderDiagrams = async () => {
-      // Wait for the DOM updates to complete.
       await nextTick();
-      // Select all elements with the "mermaid" class.
       const elements = document.querySelectorAll('.mermaid');
-      // Process these elements with Mermaid.
       mermaid.init(undefined, elements);
     };
 
     onMounted(() => {
-      // Initialize Mermaid (adjust options as needed).
       mermaid.initialize({
         startOnLoad: false,
         theme: 'default',
@@ -94,7 +94,7 @@ export default {
       renderDiagrams();
     });
 
-    // Watch for changes in any diagram definition and re-render.
+    // Watch for changes in the computed diagram definitions.
     watch(
       [userDiagramDefinition, productDiagramDefinition, categoryDiagramDefinition],
       () => {
@@ -103,8 +103,8 @@ export default {
     );
 
     return {
-      productDiagramHtml,
       userDiagramHtml,
+      productDiagramHtml,
       categoryDiagramHtml,
     };
   },
@@ -113,25 +113,35 @@ export default {
 
 <template>
   <div class="triple-analytic-diagram">
-    <!-- Each diagram is rendered into its own container -->
+    <!-- Render the three diagrams -->
     <div v-html="userDiagramHtml" />
     <div v-html="productDiagramHtml" />
     <div v-html="categoryDiagramHtml" />
   </div>
 </template>
 
-  <style scoped>
-  .triple-analytic-diagram {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 2rem;
-    margin-top: 2rem;
-  }
+<style scoped>
+.triple-analytic-diagram {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
 
-  .triple-analytic-diagram .mermaid {
-    width: 300px;
-    /* Adjust height or styling as needed */
-    text-align: center;
-  }
-  </style>
+.mermaid {
+  width: 300px;
+  text-align: center;
+}
+
+/* Remove any stroke from SVG paths */
+.mermaid svg path {
+  stroke: none !important;
+}
+
+/* Also remove any border from the SVG container */
+.mermaid svg {
+  border: none !important;
+  stroke: none !important;
+}
+</style>

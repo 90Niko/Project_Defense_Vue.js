@@ -1,9 +1,12 @@
 <script setup>
 import { useCartStore } from '@/stores/useCartStore';
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 // Initialize the cart store
 const cartStore = useCartStore();
+
+const router = useRouter();
 
 // Computed property for cart items
 const cartItems = computed(() => cartStore.cartItems);
@@ -67,6 +70,9 @@ function removeProduct(product) {
 function clearCart() {
   cartStore.clearCart();
 }
+function goToAddress() {
+  router.push({ name: 'address' });
+}
 </script>
 
 <template>
@@ -118,7 +124,7 @@ function clearCart() {
           <button class="clear-btn" @click="clearCart">
             Clear Cart
           </button>
-          <button class="checkout-btn">
+          <button class="checkout-btn" @click="goToAddress">
             Checkout
           </button>
         </div>
