@@ -60,7 +60,7 @@ export default {
 
 <template>
   <main class="content">
-    <h1>Admin Dashboard</h1>
+    <h1>Dashboard</h1>
 
     <!-- Loading Indicator -->
     <div v-if="loading" class="loading">
