@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 // Import Components
 import About from '../pages/About.vue';
+import Address from '../pages/Address.vue';
+import Cart from '../pages/Cart.vue';
 import Contacts from '../pages/Contacts.vue';
 import Details from '../pages/Details.vue';
 import Favorite from '../pages/Favorite.vue';
@@ -11,10 +13,8 @@ import NotFound from '../pages/NotFound.vue';
 import Products from '../pages/Products.vue';
 import Register from '../pages/Register.vue';
 
-// Navigation guard for protected routes
+// Navigation Guard for Protected Routes
 import { getCurrentUser, isAuthenticated } from '@/services/authServices';
-import Address from '../pages/Address.vue';
-import Cart from '../pages/Cart.vue';
 
 // Route Configuration
 const routes = [
@@ -29,17 +29,19 @@ const routes = [
   { path: '/address', name: 'address', component: Address, meta: { requiresAuth: true } },
   { path: '/unauthorized', name: 'Unauthorized', component: () => import('../pages/Unauthorized.vue') },
   { path: '/details/:id', name: 'details', component: Details, meta: { requiresAuth: true } },
+
+  // Admin Routes (Properly Structured)
   {
     path: '/admin',
-    name: 'Admin',
+    component: () => import('@/pages/admin/AdminLayout.vue'), // New Layout Wrapper
     meta: { requiresAdmin: true },
     children: [
+      { path: '', redirect: { name: 'AdminDashboard' } }, // Default to dashboard
       {
         path: 'dashboard',
         name: 'AdminDashboard',
         component: () => import('@/pages/admin/AdminDashboard.vue'),
       },
-      { path: 'mermaidDiagram', name: 'mermaidDiagram', component: () => import('@/pages/admin/MermaidDiagram.vue') },
       {
         path: 'manage-users',
         name: 'ManageUsers',
@@ -68,7 +70,6 @@ const routes = [
             component: () => import('@/pages/admin/products/CreateProduct.vue'),
           },
         ],
-
       },
       {
         path: 'category',
@@ -88,9 +89,16 @@ const routes = [
           },
         ],
       },
+      {
+        path: 'orders',
+        name: 'AllOrders',
+        component: () => import('@/pages/admin/orders/AllOrders.vue'),
+      },
     ],
   },
-  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound }, // Fallback Route
+
+  // Fallback Route
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ];
 
 // Create Router Instance
@@ -101,37 +109,29 @@ const router = createRouter({
 
 // Navigation Guard
 router.beforeEach(async (to, from, next) => {
-  console.log('Navigating to:', to.fullPath); // Debugging navigation
-  console.log('Matched routes:', to.matched.map(route => route.path)); // Debugging matched routes
-
   try {
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
     const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
 
     if (requiresAuth || requiresAdmin) {
-      const authenticated = isAuthenticated();
-      if (!authenticated) {
-        return next({ name: 'login' }); // Redirect to login if not authenticated
+      if (!isAuthenticated()) {
+        return next({ name: 'login' });
       }
 
       if (requiresAdmin) {
         const user = await getCurrentUser();
-        console.log('Authenticated User:', user);
-
-        if (user.roles && user.roles.includes('Admin')) {
-          return next(); // Allow admin access
+        if (user.roles?.includes('Admin')) {
+          return next();
         }
-        else {
-          return next({ name: 'Unauthorized' }); // Redirect non-admin users
-        }
+        return next({ name: 'Unauthorized' });
       }
     }
 
-    next(); // Allow navigation for other routes
+    next();
   }
   catch (error) {
-    console.error('Navigation Guard Error:', error);
-    next({ name: 'login' }); // Redirect to login on error
+    console.error('Navigation Error:', error);
+    next({ name: 'login' });
   }
 });
 
