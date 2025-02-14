@@ -40,6 +40,26 @@ export default {
         this.filteredOrders = this.orders; // If searchId is empty, show all orders
       }
     },
+
+    // Cancel an order
+    async cancelOrder(orderId) {
+      try {
+        // Make a request to the API to update the order status to "Cancelled"
+        await axios.put(`http://localhost:5084/api/Order/cancel/${orderId}`);
+
+        // Update the order status in the local list after successful cancellation
+        const order = this.orders.find(order => order.id === orderId);
+        if (order) {
+          order.status = 'Cancelled';
+        }
+
+        // Re-filter the orders if searchId is still present
+        this.filterOrders();
+      }
+      catch (error) {
+        console.error('Error cancelling the order:', error);
+      }
+    },
   },
 };
 </script>
@@ -91,6 +111,11 @@ export default {
         <p v-if="order.customerPhone">
           <strong>Phone:</strong> {{ order.customerPhone }}
         </p>
+
+        <!-- Cancel Button -->
+        <button v-if="order.status !== 'Cancelled'" class="cancel-button" @click="cancelOrder(order.id)">
+          Cancel Order
+        </button>
       </li>
     </ul>
 
@@ -145,5 +170,19 @@ p {
 .no-orders {
   font-size: 1.2em;
   color: #555;
+}
+
+.cancel-button {
+  background-color: #ff4d4f;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 1rem;
+}
+
+.cancel-button:hover {
+  background-color: #f5222d;
 }
 </style>
