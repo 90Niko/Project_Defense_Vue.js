@@ -60,6 +60,26 @@ export default {
         console.error('Error cancelling the order:', error);
       }
     },
+
+    // Change the order status (e.g., from Pending to Shipped)
+    async changeStatus(orderId) {
+      try {
+        // Make a request to the API to change the order status
+        await axios.put(`http://localhost:5084/api/Order/changeStatus/${orderId}`);
+
+        // Update the order status in the local list after successful status change
+        const order = this.orders.find(order => order.id === orderId);
+        if (order) {
+          order.status = 'Shipped'; // Change this to the status you want (e.g., 'Shipped', 'Delivered')
+        }
+
+        // Re-filter the orders if searchId is still present
+        this.filterOrders();
+      }
+      catch (error) {
+        console.error('Error changing the order status:', error);
+      }
+    },
   },
 };
 </script>
@@ -115,6 +135,11 @@ export default {
         <!-- Cancel Button -->
         <button v-if="order.status !== 'Cancelled'" class="cancel-button" @click="cancelOrder(order.id)">
           Cancel Order
+        </button>
+
+        <!-- Change Status Button -->
+        <button v-if="order.status !== 'Cancelled'" class="change-status-button" @click="changeStatus(order.id)">
+          Change Status
         </button>
       </li>
     </ul>
@@ -172,7 +197,8 @@ p {
   color: #555;
 }
 
-.cancel-button {
+.cancel-button,
+.change-status-button {
   background-color: #ff4d4f;
   color: white;
   padding: 8px 12px;
@@ -182,7 +208,16 @@ p {
   font-size: 1rem;
 }
 
-.cancel-button:hover {
+.cancel-button:hover,
+.change-status-button:hover {
   background-color: #f5222d;
+}
+
+.change-status-button {
+  background-color: #52c41a;
+}
+
+.change-status-button:hover {
+  background-color: #4caf50;
 }
 </style>
