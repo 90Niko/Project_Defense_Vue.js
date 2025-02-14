@@ -1,3 +1,149 @@
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      orders: [],
+      filteredOrders: [],
+      loading: true,
+      error: null,
+      searchId: '', // This will hold the search input
+    };
+  },
+  mounted() {
+    this.fetchOrders();
+  },
+  methods: {
+    async fetchOrders() {
+      try {
+        const response = await axios.get('http://localhost:5084/api/Order/getAll');
+        this.orders = response.data;
+        this.filteredOrders = this.orders; // Initially show all orders
+      }
+      catch (error) {
+        this.error = error.message || 'Error fetching orders';
+      }
+      finally {
+        this.loading = false;
+      }
+    },
+
+    // Filter orders based on the searchId
+    filterOrders() {
+      if (this.searchId) {
+        this.filteredOrders = this.orders.filter(order =>
+          order.id === Number.parseInt(this.searchId),
+        );
+      }
+      else {
+        this.filteredOrders = this.orders; // If searchId is empty, show all orders
+      }
+    },
+  },
+};
+</script>
+
 <template>
-  <h1>Orders</h1>
+  <div class="order-list">
+    <h1>All Orders</h1>
+
+    <!-- Search Input -->
+    <div class="search-container">
+      <label for="order-id">Search by Order ID:</label>
+      <input
+        id="order-id"
+        v-model="searchId"
+        type="number"
+        placeholder="Enter Order ID"
+        @input="filterOrders"
+      >
+    </div>
+
+    <div v-if="loading" class="loading">
+      Loading orders...
+    </div>
+    <div v-if="error" class="error">
+      <p>An error occurred while fetching the orders: {{ error }}</p>
+    </div>
+
+    <!-- Display Orders -->
+    <ul v-if="filteredOrders.length">
+      <li v-for="order in filteredOrders" :key="order.id" class="order-item">
+        <h2>Order ID: {{ order.id }}</h2>
+        <p><strong>Customer Name:</strong> {{ order.customerName }}</p>
+        <p><strong>Status:</strong> {{ order.status }}</p>
+        <p><strong>Total Price:</strong> €{{ order.totalPrice }}</p>
+        <p><strong>Order Date:</strong> {{ new Date(order.orderDate).toLocaleString() }}</p>
+        <ul>
+          <li v-for="item in order.orderItems" :key="item.id" class="order-item-detail">
+            <p>Product ID: {{ item.productId }}</p>
+            <p>Quantity: {{ item.quantity }}</p>
+            <p>Price: €{{ item.price }}</p>
+          </li>
+        </ul>
+        <p v-if="order.customerAddress">
+          <strong>Address:</strong> {{ order.customerAddress }}
+        </p>
+        <p v-if="order.customerEmail">
+          <strong>Email:</strong> {{ order.customerEmail }}
+        </p>
+        <p v-if="order.customerPhone">
+          <strong>Phone:</strong> {{ order.customerPhone }}
+        </p>
+      </li>
+    </ul>
+
+    <!-- No Orders Found Message -->
+    <div v-else class="no-orders">
+      <p>No orders found with that ID.</p>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.order-list {
+  margin: 20px;
+}
+
+.loading {
+  font-size: 1.2em;
+  color: #555;
+}
+
+.error {
+  color: red;
+}
+
+.search-container {
+  margin-bottom: 20px;
+}
+
+#order-id {
+  padding: 8px;
+  margin-left: 10px;
+}
+
+.order-item {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.order-item-detail {
+  margin-left: 20px;
+}
+
+h2 {
+  font-size: 1.5em;
+}
+
+p {
+  margin: 5px 0;
+}
+
+.no-orders {
+  font-size: 1.2em;
+  color: #555;
+}
+</style>
