@@ -6,6 +6,7 @@ export default {
   components: {
     AppHeader,
     AppFooter,
+
   },
 };
 </script>

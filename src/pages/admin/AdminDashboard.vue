@@ -1,7 +1,7 @@
 <script>
 import MermaidDiagram from '@/pages/admin/MermaidDiagram.vue';
 import axios from 'axios';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default {
@@ -11,48 +11,37 @@ export default {
   },
   setup() {
     const router = useRouter();
-    const categoriesCount = ref(0);
-    const productsCount = ref(0);
-    const usersCount = ref(0);
+    const categoriesCount = ref(null);
+    const productsCount = ref(null);
+    const usersCount = ref(null);
+    const loading = ref(true);
 
-    // Fetch functions for counts
-    const fetchCategoriesCount = async () => {
+    // Fetch all counts in parallel
+    const fetchCounts = async () => {
       try {
-        const response = await axios.get('http://localhost:5084/api/Category/getAll');
-        categoriesCount.value = response.data.length;
+        const [categoriesRes, productsRes, usersRes] = await Promise.all([
+          axios.get('http://localhost:5084/api/Category/getAll'),
+          axios.get('http://localhost:5084/api/Product/getAll'),
+          axios.get('http://localhost:5084/api/User/getAll'),
+        ]);
+
+        categoriesCount.value = categoriesRes.data.length;
+        productsCount.value = productsRes.data.length;
+        usersCount.value = usersRes.data.length;
       }
       catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('Error fetching counts:', error);
         categoriesCount.value = 0;
-      }
-    };
-
-    const fetchProductsCount = async () => {
-      try {
-        const response = await axios.get('http://localhost:5084/api/Product/getAll');
-        productsCount.value = response.data.length;
-      }
-      catch (error) {
-        console.error('Error fetching products:', error);
         productsCount.value = 0;
-      }
-    };
-
-    const fetchUsersCount = async () => {
-      try {
-        const response = await axios.get('http://localhost:5084/api/User/getAll');
-        usersCount.value = response.data.length;
-      }
-      catch (error) {
-        console.error('Error fetching users:', error);
         usersCount.value = 0;
       }
+      finally {
+        loading.value = false;
+      }
     };
 
-    // Fetch counts on initialization.
-    fetchCategoriesCount();
-    fetchProductsCount();
-    fetchUsersCount();
+    // Fetch counts only when the component is mounted
+    onMounted(fetchCounts);
 
     const navigateTo = (path) => {
       router.push(path);
@@ -63,135 +52,87 @@ export default {
       categoriesCount,
       productsCount,
       usersCount,
+      loading,
     };
   },
 };
 </script>
 
 <template>
-  <div class="admin-panel">
-    <aside class="sidebar">
-      <h2>Admin Panel</h2>
-      <nav>
-        <ul>
-          <li>
-            <router-link to="/dashboard">
-              Dashboard
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/users">
-              Users
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/settings">
-              Settings
-            </router-link>
-          </li>
-        </ul>
-      </nav>
-    </aside>
-    <main class="content">
-      <div class="button-group">
-        <button class="user-button" @click="navigateTo('/admin/manage-users')">
-          User Account: {{ usersCount }}
-        </button>
-        <button class="product-button" @click="navigateTo('/admin/product')">
-          Product: {{ productsCount }}
-        </button>
-        <button class="category-button" @click="navigateTo('/admin/category')">
-          Category: {{ categoriesCount }}
-        </button>
-      </div>
+  <main class="content">
+    <h1>Admin Dashboard</h1>
 
-      <!-- Other diagrams (if any) can go here -->
+    <!-- Loading Indicator -->
+    <div v-if="loading" class="loading">
+      Loading data...
+    </div>
 
-      <!-- New analytic diagrams for each entity -->
-      <MermaidDiagram
-        :product-count="productsCount"
-        :category-count="categoriesCount"
-        :user-count="usersCount"
-      />
+    <!-- Statistics Buttons -->
+    <div v-else class="button-group">
+      <button class="user-button" @click="navigateTo('/admin/manage-users')">
+        User Accounts: {{ usersCount }}
+      </button>
+      <button class="product-button" @click="navigateTo('/admin/product')">
+        Products: {{ productsCount }}
+      </button>
+      <button class="category-button" @click="navigateTo('/admin/category')">
+        Categories: {{ categoriesCount }}
+      </button>
+    </div>
 
-      <router-view />
-    </main>
-  </div>
+    <!-- Mermaid Diagram Component -->
+    <MermaidDiagram
+      v-if="!loading"
+      :product-count="productsCount"
+      :category-count="categoriesCount"
+      :user-count="usersCount"
+    />
+  </main>
 </template>
 
 <style scoped>
-.admin-panel {
+/* Main Content */
+.content {
+  flex: 1;
+  background-color: #ecf0f1;
   display: flex;
-  height: 100vh;
-  font-family: Arial, sans-serif;
-}
-
-/* Sidebar styling */
-.sidebar {
-  width: 250px;
-  background-color: #2c3e50;
-  color: #ecf0f1;
-  padding: 1rem;
-  box-sizing: border-box;
-}
-
-.sidebar h2 {
-  margin-top: 0;
-  font-size: 1.5rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-  margin: 1rem 0;
+/* Loading State */
+.loading {
+  font-size: 1.5rem;
+  text-align: center;
+  color: #555;
 }
 
-.sidebar li {
-  margin: 1rem 0;
-}
-
-.sidebar a {
-  color: #ecf0f1;
-  text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s;
-}
-
-.sidebar a:hover {
-  color: #1abc9c;
-}
-
-/* Main content styling */
-.content {
-  flex: 1;
-  padding: 2rem;
-  background-color: #ecf0f1;
-  overflow-y: auto;
-}
-
-/* Button group styling */
+/* Button Group */
 .button-group {
   display: flex;
-  flex-direction: row;
-  gap: 1.5rem;
   justify-content: center;
+  gap: 1.5rem;
   margin-top: 2rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .button-group button {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 450px;
-  height: 150px;
+  width: 220px;
+  height: 100px;
   font-size: 1.2rem;
   font-weight: bold;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   cursor: pointer;
   color: white;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 1rem;
 }
 
 .button-group button:hover {
@@ -203,6 +144,7 @@ export default {
   transform: scale(0.95);
 }
 
+/* Button Colors */
 .product-button {
   background-color: #007bff;
 }
@@ -215,22 +157,33 @@ export default {
   background-color: #ffc107;
 }
 
-/* Responsive styling */
+/* Responsive Design */
 @media (max-width: 768px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
   .button-group {
     flex-direction: column;
     gap: 1rem;
     align-items: center;
   }
+
   .button-group button {
     width: 100%;
     height: auto;
-    padding: 1rem 0;
-  }
-  .button-group button:hover {
-    transform: none;
-    box-shadow: none;
-    background-color: #555;
+    padding: 1rem;
   }
 }
 </style>
