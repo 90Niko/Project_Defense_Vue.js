@@ -41,6 +41,14 @@ export default {
       }
     },
 
+    // Toggle the visibility of the order details
+    toggleDetails(orderId) {
+      const order = this.orders.find(order => order.id === orderId);
+      if (order) {
+        order.showDetails = !order.showDetails;
+      }
+    },
+
     // Cancel an order
     async cancelOrder(orderId) {
       try {
@@ -115,22 +123,31 @@ export default {
         <p><strong>Status:</strong> {{ order.status }}</p>
         <p><strong>Total Price:</strong> €{{ order.totalPrice }}</p>
         <p><strong>Order Date:</strong> {{ new Date(order.orderDate).toLocaleString() }}</p>
-        <ul>
-          <li v-for="item in order.orderItems" :key="item.id" class="order-item-detail">
-            <p>Product ID: {{ item.productId }}</p>
-            <p>Quantity: {{ item.quantity }}</p>
-            <p>Price: €{{ item.price }}</p>
-          </li>
-        </ul>
-        <p v-if="order.customerAddress">
-          <strong>Address:</strong> {{ order.customerAddress }}
-        </p>
-        <p v-if="order.customerEmail">
-          <strong>Email:</strong> {{ order.customerEmail }}
-        </p>
-        <p v-if="order.customerPhone">
-          <strong>Phone:</strong> {{ order.customerPhone }}
-        </p>
+
+        <!-- Details Button -->
+        <button class="details-button" @click="toggleDetails(order.id)">
+          {{ order.showDetails ? 'Hide Details' : 'Show Details' }}
+        </button>
+
+        <!-- Order Details Section -->
+        <div v-if="order.showDetails">
+          <ul>
+            <li v-for="item in order.orderItems" :key="item.id" class="order-item-detail">
+              <p>Product ID: {{ item.productId }}</p>
+              <p>Quantity: {{ item.quantity }}</p>
+              <p>Price: €{{ item.price }}</p>
+            </li>
+          </ul>
+          <p v-if="order.customerAddress">
+            <strong>Address:</strong> {{ order.customerAddress }}
+          </p>
+          <p v-if="order.customerEmail">
+            <strong>Email:</strong> {{ order.customerEmail }}
+          </p>
+          <p v-if="order.customerPhone">
+            <strong>Phone:</strong> {{ order.customerPhone }}
+          </p>
+        </div>
 
         <!-- Cancel Button -->
         <button v-if="order.status !== 'Cancelled'" class="cancel-button" @click="cancelOrder(order.id)">
@@ -198,7 +215,8 @@ p {
 }
 
 .cancel-button,
-.change-status-button {
+.change-status-button,
+.details-button {
   background-color: #ff4d4f;
   color: white;
   padding: 8px 12px;
@@ -209,7 +227,8 @@ p {
 }
 
 .cancel-button:hover,
-.change-status-button:hover {
+.change-status-button:hover,
+.details-button:hover {
   background-color: #f5222d;
 }
 
@@ -219,5 +238,17 @@ p {
 
 .change-status-button:hover {
   background-color: #4caf50;
+}
+
+.details-button {
+  background-color: #1890ff;
+}
+
+.details-button:hover {
+  background-color: #40a9ff;
+}
+
+button {
+  margin-top: 10px;
 }
 </style>
