@@ -13,6 +13,7 @@ const links = [
   { name: 'contacts', label: 'Contacts' },
   { name: 'favorite', label: 'Favorite' },
   { name: 'products', label: 'Products' },
+  { name: 'inbox', label: 'Inbox' },
 ];
 
 const isLoggedIn = computed(() => authStore.isLoggedIn);

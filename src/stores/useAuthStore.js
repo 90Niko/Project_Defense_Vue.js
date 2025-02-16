@@ -4,10 +4,11 @@ import router from '../config/router';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: null,
+    token: localStorage.getItem('token') || null,
     user: null,
-    role: null,
+    role: localStorage.getItem('userRole') || null,
     isLoggedIn: false,
+    isLoading: true, // Flag to manage loading state while fetching user data
   }),
 
   actions: {
@@ -15,6 +16,9 @@ export const useAuthStore = defineStore('auth', {
       this.isLoggedIn = status;
       this.user = user;
       this.role = role;
+      // Persist role in localStorage for consistency across reloads
+      if (role)
+        localStorage.setItem('userRole', role);
     },
 
     setToken(token) {
@@ -27,7 +31,7 @@ export const useAuthStore = defineStore('auth', {
       const role = localStorage.getItem('userRole');
       if (token && role) {
         this.token = token;
-
+        this.role = role;
         try {
           const response = await axios.get('http://localhost:5084/api/auth/user', {
             headers: {
@@ -36,15 +40,12 @@ export const useAuthStore = defineStore('auth', {
           });
 
           const user = response.data;
-
           // Set user data, role, and logged-in status
-          this.isLoggedIn = true;
-          this.user = user;
-          this.role = user.role || ''; // Ensure the API includes `role` in its response
+          this.setLoggedIn(true, user, role); // Update login status and user data
         }
         catch (error) {
           console.error('Token validation failed:', error);
-          this.logout();
+          this.logout(); // If token validation fails, logout and redirect
         }
       }
       this.isLoading = false;
@@ -56,7 +57,8 @@ export const useAuthStore = defineStore('auth', {
       this.role = null;
       this.isLoggedIn = false;
       localStorage.removeItem('token');
-      router.push({ name: 'home' });
+      localStorage.removeItem('userRole');
+      router.push({ name: 'home' }); // Redirect to the home page after logout
     },
   },
 
