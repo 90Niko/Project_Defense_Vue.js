@@ -30,12 +30,6 @@ export default {
         toast.error('Please enter a message!'); // Show an error toast
         return;
       }
-
-      if (!userEmail.value) {
-        toast.error('You must be logged in to send a message.'); // Show an error toast
-        return;
-      }
-
       try {
         // Log the request payload for debugging
         console.log('Sending message:', {
@@ -81,10 +75,7 @@ export default {
       () => authStore.isLoggedIn,
       (isLoggedIn) => {
         if (!isLoggedIn) {
-          toast.error('You need to be logged in to send messages.');
-        }
-        else {
-          toast.clear(); // Clear error message toast when logged in
+          toast.clear(); // No toast when logged out
         }
         isLoading.value = false; // Set loading to false once login status is determined
       },
@@ -94,8 +85,7 @@ export default {
     // Check login status when the component is mounted
     onMounted(() => {
       if (!authStore.isLoggedIn) {
-        toast.error('You need to be logged in to send messages.');
-        isLoading.value = false;
+        isLoading.value = false; // Set loading to false once login status is determined
       }
     });
 
@@ -106,6 +96,7 @@ export default {
       errorMessage,
       sendMessage,
       isLoading,
+      authStore,
     };
   },
 };
@@ -115,7 +106,8 @@ export default {
   <div class="contacts">
     <h1>Contacts</h1>
     <ul>
-      <li v-for="contact in contacts" :key="contact.id">
+      <li v-for="contact in contacts" :key="contact.email">
+        <!-- Unique key should ideally be a unique value like email -->
         <h3>{{ contact.name }}</h3>
         <p>Email: {{ contact.email }}</p>
         <p>Phone: {{ contact.phone }}</p>
@@ -127,7 +119,8 @@ export default {
       Checking login status...
     </div>
 
-    <div v-else class="message-sender">
+    <!-- Only show message sender section if the user is logged in -->
+    <div v-else-if="authStore.isLoggedIn" class="message-sender">
       <h2>Send a Message</h2>
       <input v-model="message" type="text" placeholder="Type your message...">
       <button @click="sendMessage">
@@ -136,6 +129,11 @@ export default {
       <p v-if="errorMessage" class="error-message">
         {{ errorMessage }}
       </p>
+    </div>
+
+    <!-- Show a message to inform the user they need to be logged in -->
+    <div v-else>
+      <p>You need to be logged in to send a message.</p>
     </div>
   </div>
 </template>
