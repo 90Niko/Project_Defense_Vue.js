@@ -43,6 +43,11 @@ const routes = [
         component: () => import('@/pages/admin/AdminDashboard.vue'),
       },
       {
+        path: 'inbox',
+        name: 'Inbox',
+        component: () => import('@/pages/admin/Inbox.vue'),
+      },
+      {
         path: 'manage-users',
         name: 'ManageUsers',
         component: () => import('@/pages/admin/ManageUsers.vue'),

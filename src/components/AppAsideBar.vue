@@ -22,8 +22,8 @@ const isAdmin = computed(() => authStore.user?.role === 'Admin');
           </router-link>
         </li>
         <li>
-          <router-link to="/settings">
-            Settings
+          <router-link to="/admin/inbox">
+            Inbox
           </router-link>
         </li>
       </ul>
