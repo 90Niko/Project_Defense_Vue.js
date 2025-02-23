@@ -8,7 +8,6 @@ import Contacts from '../pages/Contacts.vue';
 import Details from '../pages/Details.vue';
 import Favorite from '../pages/Favorite.vue';
 import Home from '../pages/Home.vue';
-import Inbox from '../pages/Inbox.vue';
 import Login from '../pages/Login.vue';
 import NotFound from '../pages/NotFound.vue';
 import Products from '../pages/Products.vue';
@@ -21,7 +20,6 @@ import { getCurrentUser, isAuthenticated } from '@/services/authServices';
 const routes = [
   { path: '/', name: 'home', component: Home },
   { path: '/about', name: 'about', component: About },
-  { path: '/inbox', name: 'inbox', component: Inbox, meta: { requiresAuth: true } },
   { path: '/favorite', name: 'favorite', component: Favorite, meta: { requiresAuth: true } },
   { path: '/cart', name: 'cart', component: Cart, meta: { requiresAuth: true } },
   { path: '/contacts', name: 'contacts', component: Contacts },
@@ -38,7 +36,7 @@ const routes = [
     component: () => import('@/pages/admin/AdminLayout.vue'), // New Layout Wrapper
     meta: { requiresAdmin: true },
     children: [
-      { path: '', redirect: { name: 'AdminDashboard' } }, // Default to dashboard
+      { path: '', redirect: { name: 'AdminDashboard' } },
       {
         path: 'dashboard',
         name: 'AdminDashboard',
