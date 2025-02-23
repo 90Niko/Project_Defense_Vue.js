@@ -47,7 +47,7 @@ async function sendMessage() {
     <form @submit.prevent="sendMessage">
       <div class="form-group">
         <label for="message">Message:</label>
-        <textarea id="message" v-model="message" required />
+        <textarea id="message" v-model="message" placeholder="Type your message..." required />
       </div>
       <button type="submit" :disabled="loading">
         Send Message
