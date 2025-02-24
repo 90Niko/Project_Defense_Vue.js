@@ -13,6 +13,17 @@ export default {
     const newMessage = ref(''); // New message input
     const loading = ref(false); // Loading state for the API call
 
+    const markAsRead = async () => {
+      try {
+        await axios.get(`http://localhost:5084/api/Chat/markAsRead?userEmail=${userEmail.value}`);
+        // Refresh chat session to update message statuses
+      }
+      catch (error) {
+        console.error('Error marking messages as read:', error);
+      }
+    };
+
+    markAsRead(); // Call the function when the component is mounted
     // Fetch chat session data from the API
     const fetchChatSession = async () => {
       loading.value = true;

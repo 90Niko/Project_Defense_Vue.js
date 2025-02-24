@@ -1,7 +1,8 @@
 <script setup>
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCartStore } from '@/stores/useCartStore';
-import { computed, ref } from 'vue';
+import axios from 'axios';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useToast } from 'vue-toastification';
 
 const authStore = useAuthStore();
@@ -13,7 +14,6 @@ const links = [
   { name: 'contacts', label: 'Contacts' },
   { name: 'favorite', label: 'Favorite' },
   { name: 'products', label: 'Products' },
-  { name: 'userInbox', label: 'Inbox' },
 ];
 
 const isLoggedIn = computed(() => authStore.isLoggedIn);
@@ -25,6 +25,41 @@ const cartStore = useCartStore();
 
 // Create a computed property that returns the number of items in the cart.
 const cartCount = computed(() => cartStore.totalItems);
+
+// State for tracking unread messages
+const hasNewNotifications = ref(false);
+
+async function checkUnreadMessages() {
+  try {
+    const userEmail = authStore.user?.name;
+    if (userEmail) {
+      const response = await axios.get('http://localhost:5084/api/Chat/anyIsUnread', {
+        params: { userEmail },
+      });
+      hasNewNotifications.value = response.data; // Set true if there are unread messages
+    }
+  }
+  catch (error) {
+    console.error('Error fetching unread messages:', error);
+  }
+}
+
+// Watch for changes in login state and check unread messages when the user logs in
+watch(isLoggedIn, (newValue, oldValue) => {
+  console.log('Login state changed:', newValue); // Debug log
+  if (newValue && !oldValue) { // If user just logged in
+    checkUnreadMessages();
+  }
+});
+
+// Trigger unread check on mount if already logged in
+onMounted(() => {
+  if (isLoggedIn.value) {
+    checkUnreadMessages();
+
+    setInterval(checkUnreadMessages, 3000); // Check every 30 seconds
+  }
+});
 
 function handleLogout() {
   authStore.logout();
@@ -56,6 +91,16 @@ function closeDropdown() {
           {{ link.label }}
         </router-link>
       </li>
+
+      <!-- Show inbox link only when user is logged in -->
+      <li v-if="isLoggedIn" class="navbar" @click="closeDropdown">
+        <router-link :to="{ name: 'userInbox' }">
+          Inbox
+          <!-- Red dot notification -->
+          <span v-if="hasNewNotifications" class="notification-dot" />
+        </router-link>
+      </li>
+
       <li v-if="isAdmin" class="navbar" @click="closeDropdown">
         <router-link :to="{ name: 'AdminDashboard' }">
           Admin Area
@@ -190,5 +235,20 @@ nav {
   .dropdown-toggle {
     display: block;
   }
+}
+
+/* Red dot notification */
+.notification-dot {
+  width: 8px;
+  height: 8px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+}
+
+.navbar {
+  position: relative; /* Needed to position the notification dot correctly */
 }
 </style>
