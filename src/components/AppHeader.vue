@@ -20,10 +20,7 @@ const isLoggedIn = computed(() => authStore.isLoggedIn);
 const userName = computed(() => authStore.user?.name || '');
 const isAdmin = computed(() => authStore.user?.role === 'Admin');
 
-// Directly get the cart store instance.
 const cartStore = useCartStore();
-
-// Create a computed property that returns the number of items in the cart.
 const cartCount = computed(() => cartStore.totalItems);
 
 // State for tracking unread messages
@@ -36,7 +33,7 @@ async function checkUnreadMessages() {
       const response = await axios.get('http://localhost:5084/api/Chat/anyIsUnread', {
         params: { userEmail },
       });
-      hasNewNotifications.value = response.data; // Set true if there are unread messages
+      hasNewNotifications.value = response.data;
     }
   }
   catch (error) {
@@ -44,20 +41,18 @@ async function checkUnreadMessages() {
   }
 }
 
-// Watch for changes in login state and check unread messages when the user logs in
+// Watch login state to check unread messages
 watch(isLoggedIn, (newValue, oldValue) => {
-  console.log('Login state changed:', newValue); // Debug log
-  if (newValue && !oldValue) { // If user just logged in
+  if (newValue && !oldValue) {
     checkUnreadMessages();
   }
 });
 
-// Trigger unread check on mount if already logged in
+// Check unread messages on mount
 onMounted(() => {
   if (isLoggedIn.value) {
     checkUnreadMessages();
-
-    setInterval(checkUnreadMessages, 3000); // Check every 30 seconds
+    setInterval(checkUnreadMessages, 30000); // Check every 30 seconds
   }
 });
 
@@ -92,13 +87,14 @@ function closeDropdown() {
         </router-link>
       </li>
 
-      <!-- Show inbox link only when user is logged in -->
-      <li v-if="isLoggedIn" class="navbar" @click="closeDropdown">
+      <!-- Show Inbox only for logged-in users -->
+      <li v-if="isLoggedIn && !isAdmin" class="navbar inbox-item" @click="closeDropdown">
         <router-link :to="{ name: 'userInbox' }">
           Inbox
-          <!-- Red dot notification -->
           <span v-if="hasNewNotifications" class="notification-dot" />
         </router-link>
+        <!-- Custom Tooltip -->
+        <span v-if="hasNewNotifications" class="tooltip">You have a new message(1)</span>
       </li>
 
       <li v-if="isAdmin" class="navbar" @click="closeDropdown">
@@ -169,7 +165,6 @@ nav {
   color: #fff;
   border: none;
   padding: 0.5rem 1rem;
-  text-decoration: none;
   text-decoration: underline;
 }
 .main-links {
@@ -244,11 +239,33 @@ nav {
   background-color: red;
   border-radius: 50%;
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: -3px;
+  right: -10px;
 }
 
-.navbar {
-  position: relative; /* Needed to position the notification dot correctly */
+/* Custom Tooltip */
+.tooltip {
+  position: absolute;
+  background-color: #ffffff;
+  color: #333;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 10px;
+  top: -30px;
+  left: 280%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  display: none;
+  transition: opacity 0.2s ease-in-out;
+  opacity: 0;
+}
+
+.inbox-item:hover .tooltip {
+  display: block;
+  opacity: 1;
+}
+
+.inbox-item {
+  position: relative;
 }
 </style>

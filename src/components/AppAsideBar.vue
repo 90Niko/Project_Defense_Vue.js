@@ -1,9 +1,29 @@
 <script setup>
 import { useAuthStore } from '@/stores/useAuthStore';
-import { computed } from 'vue';
+import axios from 'axios';
+import { computed, onMounted, ref } from 'vue';
 
 const authStore = useAuthStore();
 const isAdmin = computed(() => authStore.user?.role === 'Admin');
+const unreadMessagesCount = ref(0);
+
+// Function to fetch unread messages count
+async function fetchUnreadMessages() {
+  try {
+    const response = await axios.get('http://localhost:5084/api/Chat/unReadMessage');
+    unreadMessagesCount.value = response.data.length;
+  }
+  catch (error) {
+    console.error('Error fetching unread messages:', error);
+  }
+}
+
+// Fetch unread messages on component mount
+onMounted(() => {
+  if (isAdmin.value) {
+    fetchUnreadMessages();
+  }
+});
 </script>
 
 <template>
@@ -24,6 +44,8 @@ const isAdmin = computed(() => authStore.user?.role === 'Admin');
         <li>
           <router-link to="/admin/inbox">
             Inbox
+            <!-- Notification dot if there are unread messages -->
+            <span v-if="unreadMessagesCount > 0" class="notification-dot" />
           </router-link>
         </li>
       </ul>
@@ -82,5 +104,16 @@ const isAdmin = computed(() => authStore.user?.role === 'Admin');
 .sidebar nav ul li a.router-link-active {
   background-color: #1abc9c;
   color: #ffffff;
+}
+
+/* Notification dot */
+.notification-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+
 }
 </style>

@@ -11,7 +11,7 @@ export default {
     const userEmail = ref(authStore.user?.name || ''); // Use the user's email as a placeholder
     const chatSession = ref(null); // Store the chat session
     const newMessage = ref(''); // New message input
-    const loading = ref(false); // Loading state for the API call
+    const loading = ref(false);
 
     const markAsRead = async () => {
       try {
