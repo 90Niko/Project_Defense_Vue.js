@@ -17,10 +17,12 @@ export const useAuthStore = defineStore('auth', {
       this.user = user;
       this.role = role;
 
-      if (user)
+      if (user) {
         localStorage.setItem('user', JSON.stringify(user));
-      if (role)
+      }
+      if (role) {
         localStorage.setItem('userRole', role);
+      }
     },
 
     setToken(token) {
@@ -48,6 +50,8 @@ export const useAuthStore = defineStore('auth', {
         });
 
         const user = response.data;
+
+        // Update user and role in store after successful API response
         this.setLoggedIn(true, user, user.role);
       }
       catch (error) {

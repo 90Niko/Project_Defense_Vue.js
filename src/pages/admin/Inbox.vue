@@ -17,6 +17,13 @@ export default {
       try {
         const response = await axios.get('http://localhost:5084/api/Chat/getAllChatSessions');
         console.log('Chat sessions:', response.data);
+
+        // For each session, check if there are unread messages
+        for (const session of response.data) {
+          const unreadResponse = await axios.get(`http://localhost:5084/api/Chat/anyIsUnread?userEmail=${session.userEmail}`);
+          session.hasUnread = unreadResponse.data; // Track unread status for the session
+        }
+
         chatSessions.value = response.data;
       }
       catch (error) {
@@ -83,13 +90,29 @@ export default {
       fetchChatSessions();
     });
 
-    // Toggle selected session for showing/hiding messages
-    const toggleSession = (session) => {
+    // Toggle selected session for showing/hiding messages and mark messages as read
+    const toggleSession = async (session) => {
       if (selectedSession.value === session) {
         selectedSession.value = null; // Deselect if clicked again
       }
       else {
         selectedSession.value = session; // Select this session
+
+        // Mark the session messages as read by calling the API
+        try {
+          await axios.get(`http://localhost:5084/api/Chat/adminMarkAsRead/${session.userEmail}`);
+          console.log(`Marked messages as read for session with user: ${session.userEmail}`);
+
+          // Optionally, update the message state locally to reflect the changes
+          session.messages.forEach((message) => {
+            if (message.sender !== 'Admin' && !message.isRead) {
+              message.isRead = true;
+            }
+          });
+        }
+        catch (error) {
+          console.error('Error marking messages as read:', error);
+        }
       }
     };
 
@@ -127,6 +150,8 @@ export default {
         <li v-for="session in chatSessions" :key="session.id" class="chat-session">
           <h3 @click="toggleSession(session)">
             Session ID: {{ session.id }}
+            <!-- Show red dot if there are unread messages -->
+            <span v-if="session.hasUnread" class="unread-dot" />
           </h3>
           <p>User Email: {{ session.userEmail }}</p>
           <p>Created At: {{ formatDate(session.createdAt) }}</p>
@@ -159,141 +184,151 @@ export default {
   </div>
 </template>
 
-  <style scoped>
-    .admin-inbox {
-      font-family: Arial, sans-serif;
-      background-color: #f4f7f6;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      max-width: 800px;
-      margin: 0 auto;
-    }
+<style scoped>
+  .admin-inbox {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+  }
 
-    .chat-session {
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 15px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
+  .chat-session {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
 
-    h3 {
-      margin: 0;
-      font-size: 1.3em;
-      cursor: pointer;
-      color: #333;
-      font-weight: bold;
-    }
+  h3 {
+    margin: 0;
+    font-size: 1.3em;
+    cursor: pointer;
+    color: #333;
+    font-weight: bold;
+  }
 
-    p {
-      margin: 5px 0;
-      color: #666;
-    }
+  p {
+    margin: 5px 0;
+    color: #666;
+  }
 
-    ul {
-      list-style-type: none;
-      padding-left: 0;
-    }
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
 
-    li {
-      margin-bottom: 10px;
-    }
+  li {
+    margin-bottom: 10px;
+  }
 
-    .messages {
-      margin-top: 15px;
-      padding-left: 20px;
-      padding-right: 20px;
-    }
+  .messages {
+    margin-top: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 
-    .messages ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
+  .messages ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
 
-    .message-item {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 15px;
-      padding: 10px;
-      border-radius: 8px;
-      background-color: #f1f1f1;
-    }
+  .message-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f1f1f1;
+  }
 
-    .message-item.admin {
-      background-color: #d3e6f2; /* Light blue for admin messages */
-      align-items: flex-end; /* Align admin messages to the right */
-    }
+  .message-item.admin {
+    background-color: #d3e6f2; /* Light blue for admin messages */
+    align-items: flex-end; /* Align admin messages to the right */
+  }
 
-    .message-item.user {
-      background-color: #e9f7ff; /* Light background for user messages */
-      align-items: flex-start; /* Align user messages to the left */
-    }
+  .message-item.user {
+    background-color: #e9f7ff; /* Light background for user messages */
+    align-items: flex-start; /* Align user messages to the left */
+  }
 
-    .message-item p {
-      margin: 5px 0;
-    }
+  .message-item p {
+    margin: 5px 0;
+  }
 
-    .message-item .sender {
-      font-weight: bold;
-      color: #007bff;
-    }
+  .message-item .sender {
+    font-weight: bold;
+    color: #007bff;
+  }
 
-    .message-item .content {
-      padding: 10px;
-      border-radius: 10px;
-      max-width: 70%;
-    }
+  .message-item .content {
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 70%;
+  }
 
-    .message-item .timestamp {
-      font-size: 0.8em;
-      color: #999;
-      margin-top: 5px;
-    }
+  .message-item .timestamp {
+    font-size: 0.8em;
+    color: #999;
+    margin-top: 5px;
+  }
 
-    textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      resize: none;
-      font-size: 1em;
-      box-sizing: border-box;
-    }
+  textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: none;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
 
-    button {
-      background-color: #007bff;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1em;
-      width: 100%;
-    }
+  button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    width: 100%;
+  }
 
-    button:hover {
-      background-color: #0056b3;
-    }
+  button:hover {
+    background-color: #0056b3;
+  }
 
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
+  button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
 
-    .loading {
-      font-size: 1.2em;
-      color: #007bff;
-      font-weight: bold;
-      text-align: center;
-    }
+  .loading {
+    font-size: 1.2em;
+    color: #007bff;
+    font-weight: bold;
+    text-align: center;
+  }
 
-    .no-sessions {
-      text-align: center;
-      font-size: 1.2em;
-      color: #666;
-    }
-  </style>
+  .no-sessions {
+    text-align: center;
+    font-size: 1.2em;
+    color: #666;
+  }
+
+  .unread-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: red;
+    border-radius: 50%;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+</style>

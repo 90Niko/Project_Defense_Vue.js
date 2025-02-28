@@ -1,29 +1,38 @@
 <script setup>
 import { useAuthStore } from '@/stores/useAuthStore';
 import axios from 'axios';
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const authStore = useAuthStore();
 const isAdmin = computed(() => authStore.user?.role === 'Admin');
 const unreadMessagesCount = ref(0);
 
-// Function to fetch unread messages count
 async function fetchUnreadMessages() {
   try {
     const response = await axios.get('http://localhost:5084/api/Chat/unReadMessage');
-    unreadMessagesCount.value = response.data.length;
+    console.log('API Response:', response.data);
+
+    // Ensure response structure is correct
+    if (response.data && typeof response.data.unreadCount === 'number') {
+      unreadMessagesCount.value = response.data.unreadCount;
+    }
+    else {
+      unreadMessagesCount.value = 0;
+    }
+
+    console.log('Unread messages count:', unreadMessagesCount.value);
   }
   catch (error) {
     console.error('Error fetching unread messages:', error);
   }
 }
 
-// Fetch unread messages on component mount
-onMounted(() => {
-  if (isAdmin.value) {
+// Watch for isAdmin changes and fetch messages when it becomes true
+watch(isAdmin, (newVal) => {
+  if (newVal) {
     fetchUnreadMessages();
   }
-});
+}, { immediate: true });
 </script>
 
 <template>
@@ -114,6 +123,5 @@ onMounted(() => {
   background-color: red;
   border-radius: 50%;
   position: absolute;
-
 }
 </style>
