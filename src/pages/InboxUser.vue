@@ -1,69 +1,76 @@
 <script>
 import { useAuthStore } from '@/stores/useAuthStore';
 import axios from 'axios';
-import { ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 
 export default {
   name: 'ChatSession',
   setup() {
-    // Get the user email from the store
     const authStore = useAuthStore();
-    const userEmail = ref(authStore.user?.name || ''); // Use the user's email as a placeholder
-    const chatSession = ref(null); // Store the chat session
-    const newMessage = ref(''); // New message input
+    const userEmail = ref(authStore.user?.name || '');
+    const chatSession = ref(null);
+    const newMessage = ref('');
     const loading = ref(false);
+    const messagesContainer = ref(null); // Reference to the messages container
 
     const markAsRead = async () => {
       try {
         await axios.get(`http://localhost:5084/api/Chat/markAsRead?userEmail=${userEmail.value}`);
-        // Refresh chat session to update message statuses
       }
       catch (error) {
         console.error('Error marking messages as read:', error);
       }
     };
 
-    markAsRead(); // Call the function when the component is mounted
-    // Fetch chat session data from the API
+    const scrollToBottom = () => {
+      if (messagesContainer.value) {
+        messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+      }
+    };
+
     const fetchChatSession = async () => {
       loading.value = true;
       try {
         const response = await axios.get(`http://localhost:5084/api/Chat/myChatSession/${userEmail.value}`);
-        console.log('Fetched Chat Session:', response.data); // Check the structure of the response
+        console.log('Fetched Chat Session:', response.data);
 
-        // Ensure valid data before setting the chat session
         if (response.data && response.data.id && Array.isArray(response.data.messages)) {
-          chatSession.value = response.data; // Set chat session data
+          chatSession.value = response.data;
+          // Scroll to bottom after updating the chat session
+          nextTick(() => {
+            scrollToBottom();
+          });
         }
         else {
-          chatSession.value = null; // If no valid session, set to null
+          chatSession.value = null;
         }
       }
       catch (error) {
         console.error('Error fetching chat session:', error);
-        chatSession.value = null; // Set to null on error
+        chatSession.value = null;
       }
       finally {
         loading.value = false;
       }
     };
 
-    // Send a new message to the backend
     const sendMessage = async () => {
       if (!newMessage.value.trim())
-        return; // Don't send empty messages
+        return;
       try {
         await axios.get(`http://localhost:5084/api/Chat/send?userEmail=${userEmail.value}&message=${encodeURIComponent(newMessage.value)}`);
-        newMessage.value = ''; // Clear the input after sending
-        fetchChatSession(); // Refresh the chat session to include the new message
+        newMessage.value = '';
+        fetchChatSession(); // Refresh the chat session
       }
       catch (error) {
         console.error('Error sending message:', error);
       }
     };
 
-    // Call the fetchChatSession function when the component is mounted
-    fetchChatSession();
+    onMounted(() => {
+      markAsRead();
+      fetchChatSession();
+    });
 
     return {
       userEmail,
@@ -71,6 +78,7 @@ export default {
       loading,
       newMessage,
       sendMessage,
+      messagesContainer, // Expose the ref for the template
     };
   },
 };
@@ -79,17 +87,14 @@ export default {
 <template>
   <div class="chat-container">
     <div class="chat-box">
-      <!-- Loading state -->
       <div v-if="loading" class="loading-message">
         Loading...
       </div>
 
-      <!-- No chat session found -->
       <div v-if="!chatSession" class="no-chat-session">
         <p>No chat session found. Please check if you are logged in and if the data exists.</p>
       </div>
 
-      <!-- Chat session details -->
       <div v-else>
         <h2 class="chat-header">
           Chat Session
@@ -97,8 +102,8 @@ export default {
         <p>User Email: {{ chatSession.userEmail }}</p>
         <p>Created At: {{ new Date(chatSession.createdAt).toLocaleString() }}</p>
 
-        <!-- Display messages -->
-        <div v-if="chatSession.messages.length > 0" class="messages-list">
+        <!-- Messages container with ref -->
+        <div v-if="chatSession.messages.length > 0" ref="messagesContainer" class="messages-list">
           <ul>
             <li v-for="message in chatSession.messages" :key="message.id" :class="{ 'my-message': message.sender === userEmail, 'other-message': message.sender !== userEmail }">
               <div class="message">
@@ -115,12 +120,10 @@ export default {
             </li>
           </ul>
         </div>
-        <!-- If no messages -->
         <div v-else>
           <p>No messages yet. Start the conversation!</p>
         </div>
 
-        <!-- Send Message Form -->
         <div class="message-form">
           <textarea v-model="newMessage" placeholder="Type your message..." rows="3" />
           <button @click="sendMessage">
@@ -133,13 +136,16 @@ export default {
 </template>
 
 <style scoped>
+/* Your existing styles */
+</style>
+
+<style scoped>
 /* General Chat Styling */
 .chat-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f1f1f1;
 }
 
 .chat-box {

@@ -164,7 +164,7 @@ export default {
           @click="toggleSession(session)"
         >
           <div class="session-header">
-            <span class="user-email">{{ session.userEmail }}</span>
+            <span class="user-email">{{ session.userEmail }} </span>
             <span v-if="session.hasUnread" class="unread-dot" />
           </div>
           <span class="session-date">{{ formatDate(session.createdAt) }}</span>
@@ -271,6 +271,9 @@ export default {
   height: 10px;
   background-color: #dc3545;
   border-radius: 50%;
+  left: 120px;
+  top: 15px;
+  position: relative;
 }
 
 .session-date {
@@ -390,6 +393,10 @@ button:disabled {
   .message-input {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .messages {
+    max-height: auto;
   }
 
   button {

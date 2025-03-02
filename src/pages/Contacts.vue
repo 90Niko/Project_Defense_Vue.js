@@ -63,46 +63,115 @@ async function sendMessage() {
 </template>
 
 <style scoped>
+/* General Container Styles */
 .container {
-  max-width: 400px;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background: #f9f9f9;
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 40px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  font-family: 'Roboto', sans-serif;
+  transition: all 0.3s ease-in-out;
 }
+
+/* Heading Styles */
+h2 {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+/* Form Group Styling */
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
+
+/* Label Styling */
 label {
   display: block;
-  font-weight: bold;
+  font-size: 16px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 8px;
 }
+
+/* Textarea Styling */
 textarea {
   width: 100%;
-  padding: 8px;
-  margin-top: 5px;
+  padding: 14px;
+  font-size: 15px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 8px;
+  resize: vertical;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
+textarea:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Button Styling */
 button {
   width: 100%;
-  padding: 10px;
+  padding: 15px;
   background: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
+
 button:disabled {
   background: #ccc;
+  cursor: not-allowed;
 }
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Success and Error Message Styling */
 .success {
-  color: green;
-  margin-top: 10px;
+  color: #28a745;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 16px;
 }
+
 .error {
-  color: red;
-  margin-top: 10px;
+  color: #dc3545;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 25px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  textarea {
+    font-size: 14px;
+  }
+
+  button {
+    font-size: 14px;
+  }
 }
 </style>
