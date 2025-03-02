@@ -1,18 +1,19 @@
 <script setup>
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useEventBus } from '@/stores/useEventBus'; // Import event bus
 import axios from 'axios';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const authStore = useAuthStore();
 const isAdmin = computed(() => authStore.user?.role === 'Admin');
 const unreadMessagesCount = ref(0);
+const eventBus = useEventBus(); // Use global event bus
 
 async function fetchUnreadMessages() {
   try {
     const response = await axios.get('http://localhost:5084/api/Chat/unReadMessage');
     console.log('API Response:', response.data);
 
-    // Ensure response structure is correct
     if (response.data && typeof response.data.unreadCount === 'number') {
       unreadMessagesCount.value = response.data.unreadCount;
     }
@@ -27,12 +28,19 @@ async function fetchUnreadMessages() {
   }
 }
 
-// Watch for isAdmin changes and fetch messages when it becomes true
+// Listen for the "messages-read" event and update count
+eventBus.on('messages-read', async () => {
+  await fetchUnreadMessages(); // Update unread count
+});
+
+// Fetch messages when admin logs in
 watch(isAdmin, (newVal) => {
   if (newVal) {
     fetchUnreadMessages();
   }
 }, { immediate: true });
+
+onMounted(fetchUnreadMessages);
 </script>
 
 <template>

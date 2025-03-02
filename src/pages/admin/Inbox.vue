@@ -1,30 +1,40 @@
 <script>
+import { useEventBus } from '@/stores/useEventBus';
 import axios from 'axios';
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 export default {
   setup() {
-    // Reactive state
     const chatSessions = ref([]);
     const loading = ref(false);
-    const selectedSession = ref(null); // Track selected session for displaying messages
-    const newMessage = ref(''); // New message input field
-    const userEmail = ref('Admin'); // Placeholder for admin email, update dynamically as needed
+    const selectedSession = ref(null);
+    const newMessage = ref('');
+    const eventBus = useEventBus();
+    const userEmail = ref('Admin'); // Admin email or identifier
+    let unreadInterval = null; // Store interval reference
+
+    // Function to check unread messages
+    const checkForUnreadMessages = async () => {
+      try {
+        for (const session of chatSessions.value) {
+          const unreadResponse = await axios.get(
+            `http://localhost:5084/api/Chat/userUnRead/${session.userEmail}`,
+          );
+          session.hasUnread = unreadResponse.data.unreadCount > 0;
+        }
+      }
+      catch (error) {
+        console.error('Error checking unread messages:', error);
+      }
+    };
 
     // Fetch chat sessions
     const fetchChatSessions = async () => {
       loading.value = true;
       try {
         const response = await axios.get('http://localhost:5084/api/Chat/getAllChatSessions');
-        console.log('Chat sessions:', response.data);
-
-        // For each session, check if there are unread messages
-        for (const session of response.data) {
-          const unreadResponse = await axios.get(`http://localhost:5084/api/Chat/anyIsUnread?userEmail=${session.userEmail}`);
-          session.hasUnread = unreadResponse.data; // Track unread status for the session
-        }
-
         chatSessions.value = response.data;
+        await checkForUnreadMessages(); // Check for unread messages
       }
       catch (error) {
         console.error('Error fetching chat sessions:', error);
@@ -35,16 +45,10 @@ export default {
       }
     };
 
-    // Format date
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return date.toLocaleString(); // Formats date to a readable string
-    };
-
     // Send message to selected session
     const sendMessage = async () => {
-      if (!newMessage.value.trim()) {
-        return; // Don't send empty messages
+      if (!newMessage.value.trim() || !selectedSession.value) {
+        return;
       }
 
       const messagePayload = {
@@ -52,8 +56,6 @@ export default {
         userEmail: userEmail.value,
         message: newMessage.value,
       };
-
-      console.log('Sending message with payload:', messagePayload);
 
       try {
         const response = await axios.post(
@@ -66,49 +68,34 @@ export default {
           },
         );
 
-        console.log('Message sent:', response.data);
-
-        // Add the new message to the selected session
         selectedSession.value.messages.push({
           id: response.data.id, // Assuming response contains the message ID
-          sender: 'Admin', // Since it's the admin sending the message
+          sender: 'Admin',
           content: newMessage.value,
           timestamp: new Date().toISOString(),
         });
 
-        // Clear the message input field
-        newMessage.value = ''; // Clear the input field after sending
-        console.log('Updated selected session after sending message:', selectedSession.value);
+        newMessage.value = ''; // Clear input field
       }
       catch (error) {
         console.error('Error sending message:', error);
       }
     };
 
-    // Fetch chat sessions when the component is mounted
-    onMounted(() => {
-      fetchChatSessions();
-    });
-
-    // Toggle selected session for showing/hiding messages and mark messages as read
+    // Toggle selected session and mark messages as read
     const toggleSession = async (session) => {
       if (selectedSession.value === session) {
-        selectedSession.value = null; // Deselect if clicked again
+        selectedSession.value = null; // Close session
       }
       else {
-        selectedSession.value = session; // Select this session
+        selectedSession.value = session; // Open session
 
-        // Mark the session messages as read by calling the API
         try {
           await axios.get(`http://localhost:5084/api/Chat/adminMarkAsRead/${session.userEmail}`);
-          console.log(`Marked messages as read for session with user: ${session.userEmail}`);
+          session.hasUnread = false; // Update UI
 
-          // Optionally, update the message state locally to reflect the changes
-          session.messages.forEach((message) => {
-            if (message.sender !== 'Admin' && !message.isRead) {
-              message.isRead = true;
-            }
-          });
+          // Emit event to update unread messages in the sidebar
+          eventBus.emit('messages-read');
         }
         catch (error) {
           console.error('Error marking messages as read:', error);
@@ -116,7 +103,25 @@ export default {
       }
     };
 
-    // Return reactive state and methods for use in the template
+    // Poll for unread messages every 5 seconds
+    onMounted(() => {
+      fetchChatSessions();
+      unreadInterval = setInterval(checkForUnreadMessages, 5000);
+    });
+
+    // Clear interval when component unmounts
+    onUnmounted(() => {
+      if (unreadInterval) {
+        clearInterval(unreadInterval);
+      }
+    });
+
+    // Format date
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    };
+
     return {
       chatSessions,
       loading,
@@ -161,9 +166,7 @@ export default {
             <h4>Messages:</h4>
             <ul>
               <li v-for="message in session.messages" :key="message.id" class="message-item" :class="[message.sender === 'Admin' ? 'admin' : 'user']">
-                <p>
-                  <strong>{{ message.sender }}:</strong> {{ message.content }}
-                </p>
+                <p><strong>{{ message.sender }}:</strong> {{ message.content }}</p>
                 <p class="timestamp">
                   <em>{{ formatDate(message.timestamp) }}</em>
                 </p>
@@ -231,47 +234,24 @@ export default {
     padding-right: 20px;
   }
 
-  .messages ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
   .message-item {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
     padding: 10px;
     border-radius: 8px;
     background-color: #f1f1f1;
+    margin-bottom: 10px;
   }
 
   .message-item.admin {
-    background-color: #d3e6f2; /* Light blue for admin messages */
-    align-items: flex-end; /* Align admin messages to the right */
+    background-color: #d3e6f2;
+    text-align: right;
   }
 
   .message-item.user {
-    background-color: #e9f7ff; /* Light background for user messages */
-    align-items: flex-start; /* Align user messages to the left */
+    background-color: #e9f7ff;
+    text-align: left;
   }
 
-  .message-item p {
-    margin: 5px 0;
-  }
-
-  .message-item .sender {
-    font-weight: bold;
-    color: #007bff;
-  }
-
-  .message-item .content {
-    padding: 10px;
-    border-radius: 10px;
-    max-width: 70%;
-  }
-
-  .message-item .timestamp {
+  .timestamp {
     font-size: 0.8em;
     color: #999;
     margin-top: 5px;
@@ -281,45 +261,17 @@ export default {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
     border-radius: 5px;
     resize: none;
-    font-size: 1em;
-    box-sizing: border-box;
   }
 
   button {
     background-color: #007bff;
     color: white;
-    padding: 10px 20px;
-    border: none;
+    padding: 10px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1em;
     width: 100%;
-  }
-
-  button:hover {
-    background-color: #0056b3;
-  }
-
-  button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-
-  .loading {
-    font-size: 1.2em;
-    color: #007bff;
-    font-weight: bold;
-    text-align: center;
-  }
-
-  .no-sessions {
-    text-align: center;
-    font-size: 1.2em;
-    color: #666;
   }
 
   .unread-dot {
@@ -329,6 +281,5 @@ export default {
     background-color: red;
     border-radius: 50%;
     margin-left: 10px;
-    vertical-align: middle;
   }
 </style>
