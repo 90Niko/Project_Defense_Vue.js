@@ -60,7 +60,7 @@ onMounted(fetchUnreadMessages);
         </li>
         <li>
           <router-link to="/admin/inbox">
-            Inbox
+            Inbox   ({{ unreadMessagesCount }})
             <!-- Notification dot if there are unread messages -->
             <span v-if="unreadMessagesCount > 0" class="notification-dot" />
           </router-link>
@@ -129,7 +129,7 @@ onMounted(fetchUnreadMessages);
   width: 10px;
   height: 10px;
   background-color: red;
-  border-radius: 50%;
+  border-radius: 55%;
   position: absolute;
 }
 </style>
