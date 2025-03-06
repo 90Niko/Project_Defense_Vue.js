@@ -1,76 +1,177 @@
-<script>
-export default {
-  name: 'Contacts',
-  data() {
-    return {
-      contacts: [
-        { id: 1, name: 'John Doe', email: 'john.doe@example.com', phone: '123-456-7890' },
-        { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', phone: '987-654-3210' },
-        { id: 3, name: 'Alice Johnson', email: 'alice.johnson@example.com', phone: '555-123-4567' },
-      ],
-    };
-  },
-};
+<script setup>
+import { useAuthStore } from '@/stores/useAuthStore';
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
+
+const authStore = useAuthStore();
+const userEmail = ref('');
+const message = ref('');
+const loading = ref(false);
+const successMessage = ref('');
+const errorMessage = ref('');
+
+onMounted(() => {
+  if (authStore.user) {
+    userEmail.value = authStore.user.name;
+  }
+});
+
+async function sendMessage() {
+  successMessage.value = '';
+  errorMessage.value = '';
+  loading.value = true;
+
+  try {
+    const response = await axios.get('http://localhost:5084/api/Chat/send', {
+      params: { userEmail: userEmail.value, message: message.value },
+    });
+
+    if (response.status === 200) {
+      successMessage.value = 'Message sent successfully!';
+      message.value = '';
+    }
+  }
+  catch (error) {
+    console.error(error);
+    errorMessage.value = 'Failed to send message. Please try again later.';
+  }
+  finally {
+    loading.value = false;
+  }
+}
 </script>
 
 <template>
-  <div class="contacts">
-    <h1>Contacts</h1>
-    <ul>
-      <li v-for="contact in contacts" :key="contact.id">
-        <h3>{{ contact.name }}</h3>
-        <p>Email: {{ contact.email }}</p>
-        <p>Phone: {{ contact.phone }}</p>
-      </li>
-    </ul>
+  <div class="container">
+    <h2>Contact Support</h2>
+    <form @submit.prevent="sendMessage">
+      <div class="form-group">
+        <label for="message">Message:</label>
+        <textarea id="message" v-model="message" placeholder="Type your message..." required />
+      </div>
+      <button type="submit" :disabled="loading">
+        Send Message
+      </button>
+      <p v-if="successMessage" class="success">
+        {{ successMessage }}
+      </p>
+      <p v-if="errorMessage" class="error">
+        {{ errorMessage }}
+      </p>
+    </form>
   </div>
 </template>
 
 <style scoped>
-.contacts {
-  padding: 2rem;
+/* General Container Styles */
+.container {
   max-width: 600px;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
+  margin: 40px auto;
+  padding: 40px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  font-family: 'Roboto', sans-serif;
+  transition: all 0.3s ease-in-out;
 }
 
-.contacts h1 {
-  color: #2c3e50;
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
+/* Heading Styles */
+h2 {
   text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
 }
 
-.contacts ul {
-  list-style: none;
-  padding: 0;
+/* Form Group Styling */
+.form-group {
+  margin-bottom: 20px;
 }
 
-.contacts li {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  border: 1px solid #ddd;
+/* Label Styling */
+label {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+/* Textarea Styling */
+textarea {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  border: 1px solid #ccc;
   border-radius: 8px;
-  background-color: #fefefe;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  resize: vertical;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.contacts li:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+textarea:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
 }
 
-.contacts li h3 {
-  margin: 0 0 0.5rem 0;
-  color: #34495e;
-  font-size: 1.2rem;
-  text-decoration: none;
+/* Button Styling */
+button {
+  width: 100%;
+  padding: 15px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.contacts li p {
-  margin: 0.3rem 0;
-  color: #7f8c8d;
-  font-size: 0.9rem;
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Success and Error Message Styling */
+.success {
+  color: #28a745;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.error {
+  color: #dc3545;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 25px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  textarea {
+    font-size: 14px;
+  }
+
+  button {
+    font-size: 14px;
+  }
 }
 </style>

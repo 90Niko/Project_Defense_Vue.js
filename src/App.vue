@@ -1,12 +1,23 @@
 <script>
-import AppFooter from './components/AppFooter.vue';
-import AppHeader from './components/AppHeader.vue';
+import AppFooter from '@/components/AppFooter.vue';
+import AppHeader from '@/components/AppHeader.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { onMounted } from 'vue';
 
 export default {
   components: {
     AppHeader,
     AppFooter,
+  },
+  setup() {
+    const authStore = useAuthStore();
 
+    // Ensure authentication state is initialized when app starts
+    onMounted(() => {
+      authStore.initializeAuth();
+    });
+
+    return { authStore };
   },
 };
 </script>

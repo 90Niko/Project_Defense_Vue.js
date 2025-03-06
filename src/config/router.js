@@ -15,6 +15,7 @@ import Register from '../pages/Register.vue';
 
 // Navigation Guard for Protected Routes
 import { getCurrentUser, isAuthenticated } from '@/services/authServices';
+import InboxUser from '../pages/InboxUser.vue';
 
 // Route Configuration
 const routes = [
@@ -26,6 +27,7 @@ const routes = [
   { path: '/login', name: 'login', component: Login },
   { path: '/register', name: 'register', component: Register },
   { path: '/products', name: 'products', component: Products },
+  { path: '/userInbox', name: 'userInbox', component: InboxUser, meta: { requiresAuth: true } },
   { path: '/address', name: 'address', component: Address, meta: { requiresAuth: true } },
   { path: '/unauthorized', name: 'Unauthorized', component: () => import('../pages/Unauthorized.vue') },
   { path: '/details/:id', name: 'details', component: Details, meta: { requiresAuth: true } },
@@ -36,11 +38,16 @@ const routes = [
     component: () => import('@/pages/admin/AdminLayout.vue'), // New Layout Wrapper
     meta: { requiresAdmin: true },
     children: [
-      { path: '', redirect: { name: 'AdminDashboard' } }, // Default to dashboard
+      { path: '', redirect: { name: 'AdminDashboard' } },
       {
         path: 'dashboard',
         name: 'AdminDashboard',
         component: () => import('@/pages/admin/AdminDashboard.vue'),
+      },
+      {
+        path: 'inbox',
+        name: 'Inbox',
+        component: () => import('@/pages/admin/Inbox.vue'),
       },
       {
         path: 'manage-users',

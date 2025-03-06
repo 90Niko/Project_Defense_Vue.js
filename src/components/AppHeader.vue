@@ -1,12 +1,23 @@
 <script setup>
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCartStore } from '@/stores/useCartStore';
-import { computed, ref } from 'vue';
+import axios from 'axios';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useToast } from 'vue-toastification';
 
 const authStore = useAuthStore();
 const toast = useToast();
 
+// Ensure user information is loaded from localStorage on mounted
+onMounted(() => {
+  // Check if there's a stored user in localStorage
+  const savedUser = localStorage.getItem('user');
+  if (savedUser && !authStore.user) {
+    authStore.setUser(JSON.parse(savedUser)); // Assuming `setUser` is the method to set user data in the store
+  }
+});
+
+// Links for navigation
 const links = [
   { name: 'home', label: 'Home' },
   { name: 'about', label: 'About' },
@@ -15,27 +26,66 @@ const links = [
   { name: 'products', label: 'Products' },
 ];
 
+// Recomputed values for logged-in status, username, and admin status
 const isLoggedIn = computed(() => authStore.isLoggedIn);
 const userName = computed(() => authStore.user?.name || '');
 const isAdmin = computed(() => authStore.user?.role === 'Admin');
 
-// Directly get the cart store instance.
 const cartStore = useCartStore();
-
-// Create a computed property that returns the number of items in the cart.
 const cartCount = computed(() => cartStore.totalItems);
 
+// State for tracking unread messages
+const hasNewNotifications = ref(false);
+
+// Check for unread messages
+async function checkUnreadMessages() {
+  try {
+    if (!isLoggedIn.value || isAdmin.value)
+      return; // Don't check for admins
+
+    const userEmail = authStore.user?.name;
+    if (userEmail) {
+      const response = await axios.get('http://localhost:5084/api/Chat/anyIsUnread', {
+        params: { userEmail },
+      });
+      hasNewNotifications.value = response.data;
+    }
+  }
+  catch (error) {
+    console.error('Error fetching unread messages:', error);
+  }
+}
+
+// Watch login state to check unread messages
+watch(isLoggedIn, (newValue, oldValue) => {
+  if (newValue && !oldValue) {
+    checkUnreadMessages();
+  }
+});
+
+// Check unread messages on mount
+onMounted(() => {
+  if (isLoggedIn.value) {
+    checkUnreadMessages();
+    setInterval(checkUnreadMessages, 30000); // Check every 30 seconds
+  }
+});
+
+// Handle logout action
 function handleLogout() {
   authStore.logout();
+  localStorage.removeItem('user'); // Remove the user from localStorage on logout
   toast.success('You have been logged out successfully!');
 }
 
 const isDropdownOpen = ref(false);
 
+// Toggle dropdown menu
 function toggleDropdown() {
   isDropdownOpen.value = !isDropdownOpen.value;
 }
 
+// Close dropdown menu
 function closeDropdown() {
   isDropdownOpen.value = false;
 }
@@ -55,12 +105,25 @@ function closeDropdown() {
           {{ link.label }}
         </router-link>
       </li>
+
+      <!-- Show Inbox only for logged-in users who are NOT admins -->
+      <li v-if="isLoggedIn && !isAdmin" class="navbar inbox-item" @click="closeDropdown">
+        <router-link :to="{ name: 'userInbox' }">
+          Inbox
+          <span v-if="hasNewNotifications" class="notification-dot" />
+        </router-link>
+        <!-- Custom Tooltip -->
+        <span v-if="hasNewNotifications" class="tooltip">You have a new message(1)</span>
+      </li>
+
+      <!-- Show Admin Area only for Admin users -->
       <li v-if="isAdmin" class="navbar" @click="closeDropdown">
         <router-link :to="{ name: 'AdminDashboard' }">
           Admin Area
         </router-link>
       </li>
     </ul>
+
     <ul class="auth-links">
       <li v-if="isLoggedIn">
         Welcome, {{ userName }}
@@ -123,7 +186,6 @@ nav {
   color: #fff;
   border: none;
   padding: 0.5rem 1rem;
-  text-decoration: none;
   text-decoration: underline;
 }
 .main-links {
@@ -189,5 +251,42 @@ nav {
   .dropdown-toggle {
     display: block;
   }
+}
+
+/* Red dot notification */
+.notification-dot {
+  width: 8px;
+  height: 8px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+  top: -3px;
+  right: -10px;
+}
+
+/* Custom Tooltip */
+.tooltip {
+  position: absolute;
+  background-color: #ffffff;
+  color: #333;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 10px;
+  top: -30px;
+  left: 280%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  display: none;
+  transition: opacity 0.2s ease-in-out;
+  opacity: 0;
+}
+
+.inbox-item:hover .tooltip {
+  display: block;
+  opacity: 1;
+}
+
+.inbox-item {
+  position: relative;
 }
 </style>

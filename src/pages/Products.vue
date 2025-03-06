@@ -138,8 +138,9 @@ export default {
             $ {{ product.price }}
           </p>
           <div class="btn">
-            <!-- Cart Button -->
+            <!-- Show the Add to Cart button only if the user is logged in -->
             <button
+              v-if="isLoggedIn"
               class="cart-button"
               :class="{ 'in-cart': isInCart(product) }"
               @click="toggleCart(product)"
@@ -148,7 +149,17 @@ export default {
               {{ isInCart(product) ? 'Remove' : 'Add to Cart' }}
             </button>
 
-            <!-- Favorite / Details Button -->
+            <!-- Show the Details button if the user is not logged in -->
+            <button
+              v-if="!isLoggedIn"
+              class="details-button"
+              @click="viewDetails(product)"
+            >
+              <i class="bi bi-info-circle" />
+              Details
+            </button>
+
+            <!-- Show the Favorite button only if the user is logged in -->
             <button
               v-if="isLoggedIn"
               class="favorite-button"
@@ -156,10 +167,6 @@ export default {
               @click="toggleFavorite(product)"
             >
               <i :class="isFavorite(product) ? 'bi bi-x-circle' : 'bi bi-star'" />
-            </button>
-            <button v-else class="details-button" @click="viewDetails(product)">
-              <i class="bi bi-info-circle" />
-              Details
             </button>
           </div>
         </article>

@@ -1,9 +1,46 @@
 <script setup>
 import { useAuthStore } from '@/stores/useAuthStore';
-import { computed } from 'vue';
+import { useEventBus } from '@/stores/useEventBus'; // Import event bus
+import axios from 'axios';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const authStore = useAuthStore();
 const isAdmin = computed(() => authStore.user?.role === 'Admin');
+const unreadMessagesCount = ref(0);
+const eventBus = useEventBus(); // Use global event bus
+
+async function fetchUnreadMessages() {
+  try {
+    const response = await axios.get('http://localhost:5084/api/Chat/unReadMessage');
+    console.log('API Response:', response.data);
+
+    if (response.data && typeof response.data.unreadCount === 'number') {
+      unreadMessagesCount.value = response.data.unreadCount;
+    }
+    else {
+      unreadMessagesCount.value = 0;
+    }
+
+    console.log('Unread messages count:', unreadMessagesCount.value);
+  }
+  catch (error) {
+    console.error('Error fetching unread messages:', error);
+  }
+}
+
+// Listen for the "messages-read" event and update count
+eventBus.on('messages-read', async () => {
+  await fetchUnreadMessages(); // Update unread count
+});
+
+// Fetch messages when admin logs in
+watch(isAdmin, (newVal) => {
+  if (newVal) {
+    fetchUnreadMessages();
+  }
+}, { immediate: true });
+
+onMounted(fetchUnreadMessages);
 </script>
 
 <template>
@@ -22,8 +59,10 @@ const isAdmin = computed(() => authStore.user?.role === 'Admin');
           </router-link>
         </li>
         <li>
-          <router-link to="/settings">
-            Settings
+          <router-link to="/admin/inbox">
+            Inbox   ({{ unreadMessagesCount }})
+            <!-- Notification dot if there are unread messages -->
+            <span v-if="unreadMessagesCount > 0" class="notification-dot" />
           </router-link>
         </li>
       </ul>
@@ -82,5 +121,15 @@ const isAdmin = computed(() => authStore.user?.role === 'Admin');
 .sidebar nav ul li a.router-link-active {
   background-color: #1abc9c;
   color: #ffffff;
+}
+
+/* Notification dot */
+.notification-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 55%;
+  position: absolute;
 }
 </style>
