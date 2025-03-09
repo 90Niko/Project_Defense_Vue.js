@@ -2,6 +2,7 @@
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCartStore } from '@/stores/useCartStore';
 import axios from 'axios';
+import { Home, Info, Mail, Phone, ShoppingBag, Star } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useToast } from 'vue-toastification';
 
@@ -19,11 +20,11 @@ onMounted(() => {
 
 // Links for navigation
 const links = [
-  { name: 'home', label: 'Home' },
-  { name: 'about', label: 'About' },
-  { name: 'contacts', label: 'Contacts' },
-  { name: 'favorite', label: 'Favorite' },
-  { name: 'products', label: 'Products' },
+  { name: 'home', label: 'Home', icon: Home },
+  { name: 'about', label: 'About', icon: Info },
+  { name: 'contacts', label: 'Contacts', icon: Phone },
+  { name: 'favorite', label: 'Favorite', icon: Star },
+  { name: 'products', label: 'Products', icon: ShoppingBag },
 ];
 
 // Recomputed values for logged-in status, username, and admin status
@@ -92,7 +93,7 @@ function closeDropdown() {
 </script>
 
 <template>
-  <nav>
+  <nav class="navbarr">
     <button class="dropdown-toggle" @click="toggleDropdown">
       ☰
     </button>
@@ -100,20 +101,19 @@ function closeDropdown() {
       <li class="cart-icon">
         🛍️
       </li>
-      <li v-for="link in links" :key="link.name" class="navbar" @click="closeDropdown">
+      <li v-for="link in links" :key="link.name" class="navbar-item" @click="closeDropdown">
         <router-link :to="{ name: link.name }">
+          <component :is="link.icon" class="icons" />
           {{ link.label }}
         </router-link>
       </li>
 
       <!-- Show Inbox only for logged-in users who are NOT admins -->
-      <li v-if="isLoggedIn && !isAdmin" class="navbar inbox-item" @click="closeDropdown">
+      <li v-if="isLoggedIn && !isAdmin" class="navbar-item inbox-item" @click="closeDropdown">
         <router-link :to="{ name: 'userInbox' }">
-          Inbox
+          <Mail class="icons" /> Inbox
           <span v-if="hasNewNotifications" class="notification-dot" />
         </router-link>
-        <!-- Custom Tooltip -->
-        <span v-if="hasNewNotifications" class="tooltip">You have a new message(1)</span>
       </li>
 
       <!-- Show Admin Area only for Admin users -->
@@ -166,13 +166,44 @@ function closeDropdown() {
 .logout:hover {
   background-color: #555;
 }
-.navbar {
-  text-decoration: none;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  color: #fff;
+.navbarr {
+  height:4rem;
 }
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: color 0.3s ease, background 0.3s ease;
+  border-radius: 8px;
+}
+.navbar a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #f8b400;
+}
+.icons {
+ width: 20px;
+}
+.navbar-item li{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.logout {
+  background-color: #333;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+.logout:hover {
+  background-color: #555;
+  color: #f8b400;
+}
+
 nav {
   display: flex;
   justify-content: space-between;
@@ -186,12 +217,12 @@ nav {
   color: #fff;
   border: none;
   padding: 0.5rem 1rem;
-  text-decoration: underline;
+  cursor: pointer;
 }
 .main-links {
   list-style: none;
   display: flex;
-  gap: 2rem;
+  gap: 0.2rem;
   margin: 0;
   padding: 0;
 }
@@ -208,10 +239,35 @@ nav {
   gap: 1rem;
   z-index: 1;
 }
-
-.auth-links {
+.auth-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: color 0.3s ease, background 0.3s ease;
+  border-radius: 8px;
+}
+.auth-links a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #f8b400;
+}
+.navbar-item a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: color 0.3s ease, background 0.3s ease;
+  border-radius: 8px;
+}
+.navbar-item a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #f8b400;
 }
 
 /* Responsive Dropdown */
