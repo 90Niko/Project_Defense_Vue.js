@@ -211,7 +211,6 @@ export default {
 .products {
   max-width: 1200px;
   margin: 0 auto;
-  padding-bottom: 40px;
   font-family: Arial, sans-serif;
   text-align: center;
 }

@@ -129,11 +129,9 @@ function closeDropdown() {
         Welcome, {{ userName }}
       </li>
       <li v-if="isLoggedIn">
-        <button class="cart">
-          <router-link :to="{ name: 'cart' }">
-            🛒 Cart <span v-if="cartCount > 0">({{ cartCount }})</span>
-          </router-link>
-        </button>
+        <router-link :to="{ name: 'cart' }">
+          🛒 Cart <span v-if="cartCount > 0">({{ cartCount }})</span>
+        </router-link>
       </li>
 
       <li v-if="isLoggedIn">
