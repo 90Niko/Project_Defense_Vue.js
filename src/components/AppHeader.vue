@@ -130,7 +130,7 @@ function closeDropdown() {
       </li>
       <li v-if="isLoggedIn">
         <router-link :to="{ name: 'cart' }">
-          🛒 Cart <span v-if="cartCount > 0">({{ cartCount }})</span>
+          🛒 Cart <span v-if="cartCount > 0" class="cartCount">({{ cartCount }})</span>
         </router-link>
       </li>
 
@@ -252,6 +252,10 @@ nav {
   background-color: rgba(255, 255, 255, 0.1);
   color: #f8b400;
 }
+.cartCount {
+  color:  #f8b400;
+
+}
 .navbar-item a {
   color: white;
   text-decoration: none;
@@ -301,7 +305,6 @@ nav {
     flex-direction: row;
     gap: 0.5rem;
   }
-
   .dropdown-toggle {
     display: block;
   }
