@@ -128,11 +128,18 @@ export default {
       <h3>{{ submissionError }}</h3>
     </div>
 
+    <!-- Profile Icon -->
+    <div class="profile-icon-container">
+      <img
+        class="profile-icon"
+        width="80"
+        height="80"
+        src="https://img.icons8.com/ios-filled/100/user-male-circle.png"
+        alt="Profile"
+      >
+    </div>
     <!-- Registration Form -->
     <div class="form-wrapper">
-      <h2 class="form-title">
-        Registration
-      </h2>
       <form class="form-content" @submit.prevent="submitForm">
         <!-- First Name -->
         <div class="form-group">
@@ -144,7 +151,6 @@ export default {
               src="https://img.icons8.com/fluency-systems-filled/24/name.png"
               alt="name"
             >
-            First Name
           </label>
           <input
             id="firstName"
@@ -169,7 +175,6 @@ export default {
               src="https://img.icons8.com/fluency-systems-filled/24/name.png"
               alt="name"
             >
-            Last Name
           </label>
           <input
             id="lastName"
@@ -194,7 +199,6 @@ export default {
               src="https://img.icons8.com/sf-black-filled/24/new-post.png"
               alt="email"
             >
-            Email
           </label>
           <input
             id="email"
@@ -219,7 +223,6 @@ export default {
               src="https://img.icons8.com/material-sharp/24/password.png"
               alt="password"
             >
-            Password
           </label>
           <input
             id="password"
@@ -244,7 +247,6 @@ export default {
               src="https://img.icons8.com/sf-regular-filled/24/age.png"
               alt="age"
             >
-            Age
           </label>
           <input
             id="age"
@@ -269,7 +271,6 @@ export default {
               src="https://img.icons8.com/glyph-neue/24/gender.png"
               alt="gender"
             >
-            Gender
           </label>
           <select
             id="gender"
@@ -303,6 +304,7 @@ export default {
 
 <style scoped>
 /* General Styling */
+/* General Styling */
 body {
   font-family: Arial, sans-serif;
   background-color: #f9f9f9;
@@ -312,27 +314,25 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  background-image: url('https://your-image-url.com'); /* Background image */
+  background-size: cover;
+  background-position: center;
 }
 
 .registration-container {
-  background-color: #ffffff;
-  border-radius: 8px;
+  position: relative;
+  background-color: white; /* Slightly transparent white background */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
   padding: 20px;
   box-sizing: border-box;
   margin: 0 auto;
-  margin-bottom: 70px;
-}
-
-/* Form Title */
-.form-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333333;
-  text-align: center;
-  margin-bottom: 20px;
+  margin-top: 100px;
+  margin-bottom: 100px;
+  backdrop-filter: blur(8px)!important; /* Applying blur effect to the background */
+  -webkit-backdrop-filter: blur(8px)!important;
+  z-index: 10; /* For Safari */
 }
 
 /* Form Group Styling */
@@ -343,7 +343,7 @@ body {
 
 .form-icon {
   position: absolute;
-  top: 81%;
+  top: 51%;
   left: 10px;
   transform: translateY(-45%);
 }
@@ -359,7 +359,7 @@ body {
   box-sizing: border-box;
   background-color: white;
   transition: border-color 0.2s;
-  margin:-12px auto;
+  margin:0 auto;
   margin-top: 0.5px;
   color: #333333;
 }
@@ -409,6 +409,25 @@ body {
   background-color: #007bff;
   width: 100%;
   animation: loading 1.5s linear infinite;
+}
+
+.profile-icon-container {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.profile-icon {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 15px solid white;
+  background-color: #f9f9f9;
+  position: absolute;
+  top: -95px; /* Half of the icon height to push it outside */
+  left: 50%;
+  transform: translateX(-50%); /* To center the icon horizontally */
 }
 
 @keyframes loading {
