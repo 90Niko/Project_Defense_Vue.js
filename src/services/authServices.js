@@ -19,14 +19,25 @@ export async function login(email, password) {
 export async function isAuthenticated() {
   return !!localStorage.getItem('token'); // Check if token exists
 }
+
 export function logout() {
   localStorage.removeItem('token');
+  localStorage.removeItem('userRole'); // Optionally remove the userRole as well
   router.push({ name: 'home' });
 }
 
 export async function getCurrentUser() {
   try {
-    const response = await api.get('/auth/user'); // Create an endpoint in your API to return current user info
+    const token = localStorage.getItem('token'); // Retrieve token from localStorage
+    if (!token) {
+      throw new Error('No token found, user is not authenticated');
+    }
+
+    const response = await api.get('/auth/user', {
+      headers: {
+        Authorization: `Bearer ${token}`, // Pass token in Authorization header
+      },
+    });
     return response.data;
   }
   catch (error) {

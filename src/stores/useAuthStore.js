@@ -9,6 +9,7 @@ export const useAuthStore = defineStore('auth', {
     role: localStorage.getItem('userRole') || null,
     isLoggedIn: !!localStorage.getItem('token'),
     isLoading: true, // Ensures we only update UI after auth is initialized
+    error: null, // Store error messages for authentication failures
   }),
 
   actions: {
@@ -43,6 +44,7 @@ export const useAuthStore = defineStore('auth', {
       this.setToken(token); // Set axios auth header
 
       try {
+        // Optionally, you can decode the token here to check for expiration
         const response = await axios.get('https://myshop0101.azurewebsites.net/api/auth/user', {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -56,6 +58,7 @@ export const useAuthStore = defineStore('auth', {
       }
       catch (error) {
         console.error('Token validation failed:', error);
+        this.error = 'Token validation failed. Please log in again.';
         this.logout();
       }
 
@@ -67,6 +70,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = null;
       this.role = null;
       this.isLoggedIn = false;
+      this.error = null; // Clear any existing error messages
 
       localStorage.removeItem('token');
       localStorage.removeItem('user');
