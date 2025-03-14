@@ -46,7 +46,7 @@ async function checkUnreadMessages() {
 
     const userEmail = authStore.user?.name;
     if (userEmail) {
-      const response = await axios.get('http://localhost:5084/api/Chat/anyIsUnread', {
+      const response = await axios.get('https://myshop0101.azurewebsites.net/api/Chat/anyIsUnread', {
         params: { userEmail },
       });
       hasNewNotifications.value = response.data;

@@ -11,7 +11,7 @@ const eventBus = useEventBus(); // Use global event bus
 
 async function fetchUnreadMessages() {
   try {
-    const response = await axios.get('http://localhost:5084/api/Chat/unReadMessage');
+    const response = await axios.get('https://myshop0101.azurewebsites.net/api/Chat/unReadMessage');
     console.log('API Response:', response.data);
 
     if (response.data && typeof response.data.unreadCount === 'number') {
