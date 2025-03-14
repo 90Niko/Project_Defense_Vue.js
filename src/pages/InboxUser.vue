@@ -15,7 +15,7 @@ export default {
 
     const markAsRead = async () => {
       try {
-        await axios.get(`http://localhost:5084/api/Chat/markAsRead?userEmail=${userEmail.value}`);
+        await axios.get(`http://myshop0101.azurewebsites.net/api/Chat/markAsRead?userEmail=${userEmail.value}`);
       }
       catch (error) {
         console.error('Error marking messages as read:', error);
@@ -31,7 +31,7 @@ export default {
     const fetchChatSession = async () => {
       loading.value = true;
       try {
-        const response = await axios.get(`http://localhost:5084/api/Chat/myChatSession/${userEmail.value}`);
+        const response = await axios.get(`http://myshop0101.azurewebsites.net/api/Chat/myChatSession/${userEmail.value}`);
         console.log('Fetched Chat Session:', response.data);
 
         if (response.data && response.data.id && Array.isArray(response.data.messages)) {
@@ -58,7 +58,7 @@ export default {
       if (!newMessage.value.trim())
         return;
       try {
-        await axios.get(`http://localhost:5084/api/Chat/send?userEmail=${userEmail.value}&message=${encodeURIComponent(newMessage.value)}`);
+        await axios.get(`http://myshop0101.azurewebsites.net/api/Chat/send?userEmail=${userEmail.value}&message=${encodeURIComponent(newMessage.value)}`);
         newMessage.value = '';
         fetchChatSession(); // Refresh the chat session
       }
