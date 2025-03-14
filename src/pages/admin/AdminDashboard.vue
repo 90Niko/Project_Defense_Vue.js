@@ -20,9 +20,9 @@ export default {
     const fetchCounts = async () => {
       try {
         const [categoriesRes, productsRes, usersRes] = await Promise.all([
-          axios.get('http://localhost:5084/api/Category/getAll'),
-          axios.get('http://localhost:5084/api/Product/getAll'),
-          axios.get('http://localhost:5084/api/User/getAll'),
+          axios.get('https://myshop0101.azurewebsites.net/api/Category/getAll'),
+          axios.get('https://myshop0101.azurewebsites.net/api/Product/getAll'),
+          axios.get('https://myshop0101.azurewebsites.net/api/User/getAll'),
         ]);
 
         categoriesCount.value = categoriesRes.data.length;

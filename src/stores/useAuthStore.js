@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('auth', {
       this.setToken(token); // Set axios auth header
 
       try {
-        const response = await axios.get('http://localhost:5084/api/auth/user', {
+        const response = await axios.get('https://myshop0101.azurewebsites.net/api/auth/user', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

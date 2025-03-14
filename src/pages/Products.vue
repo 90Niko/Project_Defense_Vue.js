@@ -65,14 +65,14 @@ export default {
         return '/default-product.png'; // ✅ Fallback image
 
       // ✅ Ensure full image URL
-      return imagePath.startsWith('http') ? imagePath : `http://localhost:5084/${imagePath}`;
+      return imagePath.startsWith('http') ? imagePath : `https://myshop0101.azurewebsites.net/${imagePath}`;
     };
 
     // Fetch products from API
     const loadProducts = async () => {
       isLoading.value = true;
       try {
-        const response = await axios.get('http://localhost:5084/api/Product/getAll');
+        const response = await axios.get('https://myshop0101.azurewebsites.net/api/Product/getAll');
         products.value = response.data; // Set the products array with API data
         console.log('Products:', products.value);
       }

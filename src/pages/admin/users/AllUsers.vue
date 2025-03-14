@@ -11,7 +11,7 @@ export default {
     // Fetch users from API
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:5084/api/User/getAll');
+        const response = await axios.get('https://myshop0101.azurewebsites.net/api/User/getAll');
         users.value = response.data; // Populate the users list
       }
       catch (error) {

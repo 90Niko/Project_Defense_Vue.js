@@ -32,7 +32,7 @@ export default {
         return '/default-product.png'; // ✅ Fallback image
 
       // ✅ Ensure full image URL
-      return imagePath.startsWith('http') ? imagePath : `http://localhost:5084/${imagePath}`;
+      return imagePath.startsWith('http') ? imagePath : `https://myshop0101.azurewebsites.net/${imagePath}`;
     };
 
     // Reset the isRemoved flag to false to "restore" the product

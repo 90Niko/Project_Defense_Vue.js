@@ -17,7 +17,7 @@ export default {
   methods: {
     async fetchOrders() {
       try {
-        const response = await axios.get('http://localhost:5084/api/Order/getAll');
+        const response = await axios.get('http://myshop0101.azurewebsites.net/api/Order/getAll');
         this.orders = response.data;
         this.filteredOrders = this.orders; // Initially show all orders
       }
@@ -53,7 +53,7 @@ export default {
     async cancelOrder(orderId) {
       try {
         // Make a request to the API to update the order status to "Cancelled"
-        await axios.put(`http://localhost:5084/api/Order/cancel/${orderId}`);
+        await axios.put(`http://myshop0101.azurewebsites.net/api/Order/cancel/${orderId}`);
 
         // Update the order status in the local list after successful cancellation
         const order = this.orders.find(order => order.id === orderId);
@@ -73,7 +73,7 @@ export default {
     async changeStatus(orderId) {
       try {
         // Make a request to the API to change the order status
-        await axios.put(`http://localhost:5084/api/Order/changeStatus/${orderId}`);
+        await axios.put(`http://myshop0101.azurewebsites.net/api/Order/changeStatus/${orderId}`);
 
         // Update the order status in the local list after successful status change
         const order = this.orders.find(order => order.id === orderId);

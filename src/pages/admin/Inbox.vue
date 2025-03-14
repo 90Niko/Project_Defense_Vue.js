@@ -26,7 +26,7 @@ export default {
       try {
         for (const session of chatSessions.value) {
           const unreadResponse = await axios.get(
-            `http://localhost:5084/api/Chat/userUnRead/${session.userEmail}`,
+            `https://myshop0101.azurewebsites.net/api/Chat/userUnRead/${session.userEmail}`,
           );
           session.hasUnread = unreadResponse.data.unreadCount > 0;
         }
@@ -39,7 +39,7 @@ export default {
     const fetchChatSessions = async () => {
       loading.value = true;
       try {
-        const response = await axios.get('http://localhost:5084/api/Chat/getAllChatSessions');
+        const response = await axios.get('https://myshop0101.azurewebsites.net/api/Chat/getAllChatSessions');
         chatSessions.value = response.data;
         await checkForUnreadMessages(); // Check for unread messages
       }
@@ -67,7 +67,7 @@ export default {
 
       try {
         const response = await axios.post(
-          'http://localhost:5084/api/Chat/sendByCurrentChatSesions',
+          'https://myshop0101.azurewebsites.net/api/Chat/sendByCurrentChatSesions',
           messagePayload,
           { headers: { 'Content-Type': 'application/json' } },
         );
@@ -95,7 +95,7 @@ export default {
       else {
         selectedSession.value = session; // Open session
         try {
-          await axios.get(`http://localhost:5084/api/Chat/adminMarkAsRead/${session.userEmail}`);
+          await axios.get(`https://myshop0101.azurewebsites.net/api/Chat/adminMarkAsRead/${session.userEmail}`);
           session.hasUnread = false; // Update UI
           eventBus.emit('messages-read'); // Emit event to update sidebar
         }

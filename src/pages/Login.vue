@@ -18,7 +18,7 @@ async function handleLogin() {
   errorMessage.value = null;
 
   try {
-    const response = await axios.post('http://localhost:5084/api/auth/login', {
+    const response = await axios.post('https://myshop0101.azurewebsites.net/api/auth/login', {
       email: username.value,
       password: password.value,
     });
