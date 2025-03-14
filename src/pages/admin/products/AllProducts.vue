@@ -51,7 +51,7 @@ export default {
     // Fetch products from API
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:5084/api/Product/getAll');
+        const response = await axios.get('https://myshop0101.azurewebsites.net/api/Product/getAll');
         products.value = response.data;
         toast.success('Products loaded successfully!');
       }
@@ -68,7 +68,7 @@ export default {
     // Delete a product
     const deleteProduct = async (id) => {
       try {
-        await axios.delete(`http://localhost:5084/api/Product/delete/${id}`);
+        await axios.delete(`https://myshop0101.azurewebsites.net/api/Product/delete/${id}`);
         products.value = products.value.filter(product => product.id !== id);
         toast.success('Product deleted successfully!');
       }

@@ -95,7 +95,7 @@ async function submitForm() {
   try {
     isSubmitting.value = true;
 
-    const response = await axios.post('http://localhost:5084/api/Order/create', orderData, {
+    const response = await axios.post('https://myshop0101.azurewebsites.net/api/Order/create', orderData, {
       headers: { 'Content-Type': 'application/json' },
     });
 

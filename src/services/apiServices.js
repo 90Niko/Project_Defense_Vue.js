@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5084/api', // Replace with your ASP.NET Core API URL
+  baseURL: 'https://myshop0101.azurewebsites.net/api', // Replace with your ASP.NET Core API URL
   headers: {
     'Content-Type': 'application/json',
   },

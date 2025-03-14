@@ -28,7 +28,7 @@ function getImageUrl(imagePath) {
 
   return imagePath.startsWith('http')
     ? imagePath
-    : `http://localhost:5084/${imagePath}`;
+    : `https://myshop0101.azurewebsites.net/${imagePath}`;
 }
 
 // Updates the quantity for a given item.

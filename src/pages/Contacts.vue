@@ -22,7 +22,7 @@ async function sendMessage() {
   loading.value = true;
 
   try {
-    const response = await axios.get('http://localhost:5084/api/Chat/send', {
+    const response = await axios.get('https://myshop0101.azurewebsites.net/api/Chat/send', {
       params: { userEmail: userEmail.value, message: message.value },
     });
 

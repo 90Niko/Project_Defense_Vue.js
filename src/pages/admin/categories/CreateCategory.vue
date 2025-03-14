@@ -22,7 +22,7 @@ export default {
 
       try {
         // Check if category already exists
-        const existingCategory = await axios.get(`http://myshop0101.azurewebsites.net/api/Category/getAll`, {
+        const existingCategory = await axios.get(`https://myshop0101.azurewebsites.net/api/Category/getAll`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -36,7 +36,7 @@ export default {
         }
 
         // Make a POST request to the backend
-        await axios.post('http://localhost:5084/api/Category', {
+        await axios.post('https://myshop0101.azurewebsites.net/api/Category', {
           name: name.value,
         }, {
           headers: {

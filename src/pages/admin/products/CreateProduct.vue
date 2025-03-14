@@ -19,7 +19,7 @@ export default {
     // Fetch categories from the API
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:5084/api/Category/getAll');
+        const response = await axios.get('https://myshop0101.azurewebsites.net/api/Category/getAll');
         categories.value = response.data;
       }
       catch (error) {
@@ -51,7 +51,7 @@ export default {
         }
 
         const response = await axios.post(
-          'http://localhost:5084/api/Product/create',
+          'https://myshop0101.azurewebsites.net/api/Product/create',
           formData,
           {
             headers: {

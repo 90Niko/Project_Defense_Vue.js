@@ -19,7 +19,7 @@ export default {
       // Ensure a full URL is provided if needed
       return imagePath.startsWith('http')
         ? imagePath
-        : `http://localhost:5084/${imagePath}`;
+        : `https://myshop0101.azurewebsites.net/${imagePath}`;
     };
 
     return {
