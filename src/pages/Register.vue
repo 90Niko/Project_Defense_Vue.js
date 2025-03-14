@@ -65,7 +65,7 @@ export default {
 
       try {
         const response = await axios.post(
-          'http://localhost:5084/api/User/register',
+          'http://myshop0101.azurewebsites.net/api/User/register',
           {
             firstName: form.value.firstName,
             lastName: form.value.lastName,

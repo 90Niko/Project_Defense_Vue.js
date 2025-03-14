@@ -43,7 +43,7 @@ export default {
     const deleteCategory = async (id) => {
       if (await showConfirmDialog('Are you sure you want to delete this category?')) {
         try {
-          await axios.delete(`http://localhost:5084/api/Category/${id}`);
+          await axios.delete(`http://myshop0101.azurewebsites.net/api/Category/${id}`);
           categories.value = categories.value.filter(category => category.id !== id);
           toast.success('Category deleted successfully!'); // Toast success message
         }
