@@ -1,9 +1,9 @@
 <script>
+import axiosWebApi from '@/config/axiosWebApi';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCartStore } from '@/stores/useCartStore'; // Import your cart store
 import { useDetailsStore } from '@/stores/useDetailsStore';
 import { useFavoriteStore } from '@/stores/useFavoriteStore';
-import axios from 'axios'; // Use axios directly
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -65,15 +65,15 @@ export default {
         return '/default-product.png'; // ✅ Fallback image
 
       // ✅ Ensure full image URL
-      return imagePath.startsWith('http') ? imagePath : `https://myshop0101.azurewebsites.net/${imagePath}`;
+      return imagePath.startsWith('http') ? imagePath : `http://localhost:5084/${imagePath}`;
     };
 
     // Fetch products from API
     const loadProducts = async () => {
       isLoading.value = true;
       try {
-        const response = await axios.get('https://myshop0101.azurewebsites.net/api/Product/getAll');
-        products.value = response.data; // Set the products array with API data
+        const response = await axiosWebApi.get('/api/Product/getAll');
+        products.value = response.data;
         console.log('Products:', products.value);
       }
       catch (error) {

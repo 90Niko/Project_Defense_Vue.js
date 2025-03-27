@@ -3,56 +3,42 @@ import { useCartStore } from '@/stores/useCartStore';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
-// Initialize the cart store
 const cartStore = useCartStore();
-
 const router = useRouter();
-
-// Computed property for cart items
 const cartItems = computed(() => cartStore.cartItems);
-
-// Calculate the total number of items by summing the quantity of each item.
 const totalItems = computed(() =>
   cartStore.cartItems.reduce((acc, item) => acc + item.quantity, 0),
 );
 
-// Total price factors in each item's quantity.
 const totalPrice = computed(() =>
   cartStore.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
 );
 
-// Returns a full image URL or a fallback image if not provided.
 function getImageUrl(imagePath) {
   if (!imagePath)
-    return '/default-product.png'; // Fallback image
+    return '/default-product.png';
 
   return imagePath.startsWith('http')
     ? imagePath
-    : `https://myshop0101.azurewebsites.net/${imagePath}`;
+    : `http://localhost:5084/${imagePath}`;
 }
 
-// Updates the quantity for a given item.
 function updateQuantity(item) {
   console.log(`Updated quantity for ${item.name} to ${item.quantity}`);
-  // Optionally, update the store:
-  // cartStore.updateQuantity(item, item.quantity);
 }
 
-// Helper to ensure item.quantity is a valid number.
 function ensureQuantity(item) {
   if (typeof item.quantity !== 'number' || Number.isNaN(item.quantity)) {
     item.quantity = 1;
   }
 }
 
-// Increments the quantity of the given item.
 function incrementQuantity(item) {
   ensureQuantity(item);
   item.quantity++;
   updateQuantity(item);
 }
 
-// Decrements the quantity of the given item (ensuring it doesn't drop below 1).
 function decrementQuantity(item) {
   ensureQuantity(item);
   if (item.quantity > 1) {
@@ -61,12 +47,10 @@ function decrementQuantity(item) {
   }
 }
 
-// Removes a product from the cart.
 function removeProduct(product) {
   cartStore.removeProduct(product);
 }
 
-// Clears the entire cart.
 function clearCart() {
   cartStore.clearCart();
 }
@@ -78,13 +62,10 @@ function goToAddress() {
 <template>
   <div class="cart">
     <h1>Shopping Cart</h1>
-
-    <!-- When the cart is empty -->
     <div v-if="cartItems.length === 0" class="empty-cart">
       <p>Your cart is empty.</p>
     </div>
 
-    <!-- Display cart items if available -->
     <div v-else>
       <ul class="cart-list">
         <li v-for="item in cartItems" :key="item.id" class="cart-item">

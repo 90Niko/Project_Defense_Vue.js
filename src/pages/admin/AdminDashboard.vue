@@ -1,6 +1,6 @@
 <script>
+import axiosWebApi from '@/config/axiosWebApi';
 import MermaidDiagram from '@/pages/admin/MermaidDiagram.vue';
-import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -20,9 +20,9 @@ export default {
     const fetchCounts = async () => {
       try {
         const [categoriesRes, productsRes, usersRes] = await Promise.all([
-          axios.get('https://myshop0101.azurewebsites.net/api/Category/getAll'),
-          axios.get('https://myshop0101.azurewebsites.net/api/Product/getAll'),
-          axios.get('https://myshop0101.azurewebsites.net/api/User/getAll'),
+          axiosWebApi.get('/api/Category/getAll'),
+          axiosWebApi.get('/api/Product/getAll'),
+          axiosWebApi.get('/api/User/getAll'),
         ]);
 
         categoriesCount.value = categoriesRes.data.length;
@@ -40,7 +40,6 @@ export default {
       }
     };
 
-    // Fetch counts only when the component is mounted
     onMounted(fetchCounts);
 
     const navigateTo = (path) => {
@@ -61,13 +60,9 @@ export default {
 <template>
   <main class="content">
     <h1>Dashboard</h1>
-
-    <!-- Loading Indicator -->
     <div v-if="loading" class="loading">
       Loading data...
     </div>
-
-    <!-- Statistics Buttons -->
     <div v-else class="button-group">
       <button class="user-button" @click="navigateTo('/admin/manage-users')">
         User Accounts: {{ usersCount }}
@@ -79,8 +74,6 @@ export default {
         Categories: {{ categoriesCount }}
       </button>
     </div>
-
-    <!-- Mermaid Diagram Component -->
     <MermaidDiagram
       v-if="!loading"
       :product-count="productsCount"
@@ -91,7 +84,6 @@ export default {
 </template>
 
 <style scoped>
-/* Main Content */
 .content {
   flex: 1;
   background-color: #ecf0f1;
@@ -102,14 +94,12 @@ export default {
   text-align: center;
 }
 
-/* Loading State */
 .loading {
   font-size: 1.5rem;
   text-align: center;
   color: #555;
 }
 
-/* Button Group */
 .button-group {
   display: flex;
   justify-content: center;
@@ -144,7 +134,6 @@ export default {
   transform: scale(0.95);
 }
 
-/* Button Colors */
 .product-button {
   background-color: #007bff;
 }
@@ -157,7 +146,6 @@ export default {
   background-color: #ffc107;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .admin-layout {
     flex-direction: column;

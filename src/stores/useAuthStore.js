@@ -1,5 +1,5 @@
+import axiosWebApi from '@/config/axiosWebApi';
 import router from '@/config/router';
-import axios from 'axios';
 import { defineStore } from 'pinia';
 
 export const useAuthStore = defineStore('auth', {
@@ -31,7 +31,7 @@ export const useAuthStore = defineStore('auth', {
       localStorage.setItem('token', token);
 
       // Set default Authorization header for Axios
-      axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+      axiosWebApi.defaults.headers.common.Authorization = `Bearer ${token}`;
     },
 
     async initializeAuth() {
@@ -45,7 +45,7 @@ export const useAuthStore = defineStore('auth', {
 
       try {
         // Optionally, you can decode the token here to check for expiration
-        const response = await axios.get('https://myshop0101.azurewebsites.net/api/auth/user', {
+        const response = await axiosWebApi.get('/api/auth/user', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -76,7 +76,7 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('user');
       localStorage.removeItem('userRole');
 
-      delete axios.defaults.headers.common.Authorization; // Remove token from Axios
+      delete axiosWebApi.defaults.headers.common.Authorization; // Remove token from Axios
 
       router.push({ name: 'home' }); // Redirect after logout
     },

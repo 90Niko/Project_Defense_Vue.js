@@ -1,21 +1,17 @@
 <script setup>
-import { useAuthStore } from '@/stores/useAuthStore'; // Import auth store
+import axiosWebApi from '@/config/axiosWebApi';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useCartStore } from '@/stores/useCartStore';
-import axios from 'axios';
 import { computed, onMounted, ref } from 'vue';
 
 const cartStore = useCartStore();
-const authStore = useAuthStore(); // Access auth store
-
-// Reactive form data
+const authStore = useAuthStore();
 const address = ref('');
 const city = ref('');
 const zip = ref('');
 const country = ref('');
 const phoneNumber = ref('');
 const fullName = ref('');
-
-// Error messages
 const errors = ref({
   address: '',
   city: '',
@@ -26,10 +22,7 @@ const errors = ref({
   general: '',
 });
 
-// Loading state
 const isSubmitting = ref(false);
-
-// Computed properties
 const allCartProducts = computed(() => cartStore.cartItems);
 const totalItems = computed(() =>
   cartStore.cartItems.reduce((acc, item) => acc + item.quantity, 0),
@@ -38,7 +31,6 @@ const totalPrice = computed(() =>
   cartStore.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2),
 );
 
-// Validate fields
 function validateField(field, label) {
   if (!field.value) {
     errors.value[label] = `${label} is required.`;
@@ -48,15 +40,11 @@ function validateField(field, label) {
   }
 }
 
-// Submit order
 async function submitForm() {
   if (isSubmitting.value)
     return;
-
-  // Reset errors
   errors.value = { address: '', city: '', zip: '', country: '', phoneNumber: '', fullName: '', general: '' };
 
-  // Validate fields
   validateField(address, 'address');
   validateField(city, 'city');
   validateField(zip, 'zip');
@@ -64,7 +52,6 @@ async function submitForm() {
   validateField(phoneNumber, 'phoneNumber');
   validateField(fullName, 'fullName');
 
-  // Check for errors
   if (Object.values(errors.value).some(error => error !== ''))
     return;
 
@@ -73,10 +60,9 @@ async function submitForm() {
     return;
   }
 
-  // Prepare order data with userId from authStore
   const orderData = {
     customerName: fullName.value,
-    customerEmail: authStore.user?.email || '', // Optional if you have email in user data
+    customerEmail: authStore.user?.email || '',
     customerPhone: phoneNumber.value,
     totalPrice: Number.parseFloat(totalPrice.value),
     address: `${address.value}, ${city.value}, ${zip.value}, ${country.value}`,
@@ -95,13 +81,12 @@ async function submitForm() {
   try {
     isSubmitting.value = true;
 
-    const response = await axios.post('https://myshop0101.azurewebsites.net/api/Order/create', orderData, {
+    const response = await axiosWebApi.post('/api/Order/create', orderData, {
       headers: { 'Content-Type': 'application/json' },
     });
 
     console.log('Order Created:', response.data);
 
-    // Clear cart and form
     cartStore.clearCart();
     address.value = '';
     city.value = '';
@@ -118,7 +103,6 @@ async function submitForm() {
   }
 }
 
-// Load saved address from localStorage
 onMounted(() => {
   const savedAddress = JSON.parse(localStorage.getItem('shippingAddress') || '{}');
   address.value = savedAddress.address || '';
@@ -133,8 +117,6 @@ onMounted(() => {
 <template>
   <div class="address">
     <h1>Add Shipping Address</h1>
-
-    <!-- Cart Summary -->
     <div v-if="totalItems > 0" class="listItems">
       <h2>Cart Summary ({{ totalItems }} items)</h2>
       <ul>
@@ -153,13 +135,9 @@ onMounted(() => {
     <p v-else>
       Your cart is empty.
     </p>
-
-    <!-- General Error Message -->
     <p v-if="errors.general" class="error">
       {{ errors.general }}
     </p>
-
-    <!-- Address Form -->
     <form aria-labelledby="address-form-title" @submit.prevent="submitForm">
       <div>
         <label for="fullName">Full Name</label>
@@ -197,10 +175,6 @@ onMounted(() => {
     </form>
   </div>
 </template>
-
-<style scoped>
-/* Add your styling here */
-</style>
 
 <style scoped>
 .address {

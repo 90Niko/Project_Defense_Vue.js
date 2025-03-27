@@ -1,15 +1,15 @@
 <script>
-import axios from 'axios';
+import axiosWebApi from '@/config/axiosWebApi';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 
 export default {
   setup() {
-    const name = ref(''); // Bind to the input field
-    const isLoading = ref(false); // To handle loading state
-    const router = useRouter(); // Router instance
-    const toast = useToast(); // Toast instance
+    const name = ref('');
+    const isLoading = ref(false);
+    const router = useRouter();
+    const toast = useToast();
 
     const createCategory = async () => {
       // Validate input
@@ -18,11 +18,10 @@ export default {
         return;
       }
 
-      isLoading.value = true; // Set loading state
+      isLoading.value = true;
 
       try {
-        // Check if category already exists
-        const existingCategory = await axios.get(`https://myshop0101.azurewebsites.net/api/Category/getAll`, {
+        const existingCategory = await axiosWebApi.get(`/api/Category/getAll`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -35,8 +34,7 @@ export default {
           return;
         }
 
-        // Make a POST request to the backend
-        await axios.post('https://myshop0101.azurewebsites.net/api/Category', {
+        await axiosWebApi.post('/api/Category', {
           name: name.value,
         }, {
           headers: {
@@ -44,17 +42,14 @@ export default {
           },
         });
 
-        // Handle success
         toast.success('Category created successfully!');
-        name.value = ''; // Reset the input field
+        name.value = '';
 
-        // Navigate to the admin dashboard
         setTimeout(() => {
           router.push('/admin/category/all-category');
         }, 2000);
       }
       catch (error) {
-        // Handle error
         if (error.response && error.response.data && error.response.data.message) {
           toast.error(error.response.data.message);
         }
@@ -63,7 +58,7 @@ export default {
         }
       }
       finally {
-        isLoading.value = false; // Reset loading state
+        isLoading.value = false;
       }
     };
 

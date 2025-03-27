@@ -1,5 +1,5 @@
 <script>
-import axios from 'axios';
+import axiosWebApi from '@/config/axiosWebApi';
 import dayjs from 'dayjs';
 import { computed, onMounted, ref } from 'vue';
 import { useToast } from 'vue-toastification';
@@ -11,17 +11,12 @@ export default {
     const isLoading = ref(true);
     const errorMessage = ref('');
     const toast = useToast();
-
-    // Sorting state
-    const sortBy = ref(''); // options: '', 'date', 'price', 'category'
-    const sortOrder = ref('asc'); // 'asc' or 'desc'
-
-    // Toggle sort order between ascending and descending
+    const sortBy = ref('');
+    const sortOrder = ref('asc');
     const toggleSortOrder = () => {
       sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
     };
 
-    // Computed sorted products based on sortBy and sortOrder
     const sortedProducts = computed(() => {
       if (!sortBy.value) {
         return products.value;
@@ -48,10 +43,9 @@ export default {
       });
     });
 
-    // Fetch products from API
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('https://myshop0101.azurewebsites.net/api/Product/getAll');
+        const response = await axiosWebApi.get('/api/Product/getAll');
         products.value = response.data;
         toast.success('Products loaded successfully!');
       }
@@ -64,11 +58,9 @@ export default {
         isLoading.value = false;
       }
     };
-
-    // Delete a product
     const deleteProduct = async (id) => {
       try {
-        await axios.delete(`https://myshop0101.azurewebsites.net/api/Product/delete/${id}`);
+        await axiosWebApi.delete(`/api/Product/delete/${id}`);
         products.value = products.value.filter(product => product.id !== id);
         toast.success('Product deleted successfully!');
       }
@@ -79,11 +71,9 @@ export default {
       }
     };
 
-    // Edit a product (redirect to edit page or open a modal)
     const editProduct = (id) => {
       console.log('Edit product with ID:', id);
       toast.info(`Edit product with ID: ${id}`);
-      // Implement your edit logic here
     };
 
     onMounted(() => {
@@ -111,8 +101,6 @@ export default {
     <h1 class="title">
       Product List
     </h1>
-
-    <!-- Sorting Controls -->
     <div v-if="products.length" class="sort-controls">
       <label for="sortField">Sort by:</label>
       <select id="sortField" v-model="sortBy">
@@ -143,8 +131,6 @@ export default {
     <div v-else-if="products.length === 0" class="no-products-message">
       No products available.
     </div>
-
-    <!-- Responsive Table Wrapper -->
     <div v-else class="table-responsive">
       <table class="product-table">
         <thead>
@@ -203,7 +189,6 @@ export default {
 </template>
 
 <style scoped>
-/* Base Styles */
 .product-container {
   padding: 20px;
   background-color: #f9f9f9;
@@ -226,7 +211,6 @@ export default {
   margin: 20px 0;
 }
 
-/* Sorting Controls */
 .sort-controls {
   text-align: center;
   margin-bottom: 20px;
@@ -254,17 +238,15 @@ export default {
   cursor: pointer;
 }
 
-/* Responsive Table Wrapper */
 .table-responsive {
   width: 100%;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* Enables smooth scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Table Styling */
 .product-table {
   width: 100%;
-  min-width: 800px; /* Set a min-width to force horizontal scrolling on smaller screens */
+  min-width: 800px;
   border-collapse: collapse;
   margin-top: 20px;
   background-color: #fff;
@@ -297,7 +279,6 @@ export default {
   text-align: center;
 }
 
-/* Buttons */
 .edit-button,
 .delete-button,
 .details-button {
@@ -338,7 +319,6 @@ export default {
   background-color: #e53935;
 }
 
-/* Responsive Adjustments for Smaller Screens */
 @media (max-width: 680px) {
   .product-table th,
   .product-table td {

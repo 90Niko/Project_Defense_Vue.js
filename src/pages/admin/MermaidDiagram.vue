@@ -19,14 +19,11 @@ export default {
     },
   },
   setup(props) {
-    // Define your target value.
     const target = 100;
 
-    // --- User Diagram ---
     const userDiagramDefinition = computed(() => {
       const achieved = props.userCount;
       const remaining = achieved >= target ? 0 : target - achieved;
-      // Set pie1 to #ffc107 and pie2 to dark grey (#343a40).
       return `
 %%{init: {"themeVariables": {"pie1": "#ffc107", "pie2": "#2c3e50"}}}%%
 pie
@@ -41,11 +38,9 @@ ${userDiagramDefinition.value}
 </div>`;
     });
 
-    // --- Product Diagram ---
     const productDiagramDefinition = computed(() => {
       const achieved = props.productCount;
       const remaining = achieved >= target ? 0 : target - achieved;
-      // Set pie1 to #007bff and pie2 to dark grey (#343a40).
       return `
 %%{init: {"themeVariables": {"pie1": "#007bff", "pie2": "#2c3e50"}}}%%
 pie
@@ -59,12 +54,9 @@ pie
 ${productDiagramDefinition.value}
 </div>`;
     });
-
-    // --- Category Diagram ---
     const categoryDiagramDefinition = computed(() => {
       const achieved = props.categoryCount;
       const remaining = achieved >= target ? 0 : target - achieved;
-      // Set pie1 to #28a745 and pie2 to dark grey (#343a40).
       return `
 %%{init: {"themeVariables": {"pie1": "#28a745", "pie2": "#2c3e50"}}}%%
 pie
@@ -78,8 +70,6 @@ pie
 ${categoryDiagramDefinition.value}
 </div>`;
     });
-
-    // Function to render or re-render the diagrams.
     const renderDiagrams = async () => {
       await nextTick();
       const elements = document.querySelectorAll('.mermaid');
@@ -93,8 +83,6 @@ ${categoryDiagramDefinition.value}
       });
       renderDiagrams();
     });
-
-    // Watch for changes in the computed diagram definitions.
     watch(
       [userDiagramDefinition, productDiagramDefinition, categoryDiagramDefinition],
       () => {
@@ -113,7 +101,6 @@ ${categoryDiagramDefinition.value}
 
 <template>
   <div class="triple-analytic-diagram">
-    <!-- Render the three diagrams -->
     <div v-html="userDiagramHtml" />
     <div v-html="productDiagramHtml" />
     <div v-html="categoryDiagramHtml" />
@@ -134,12 +121,10 @@ ${categoryDiagramDefinition.value}
   text-align: center;
 }
 
-/* Remove any stroke from SVG paths */
 .mermaid svg path {
   stroke: none !important;
 }
 
-/* Also remove any border from the SVG container */
 .mermaid svg {
   border: none !important;
   stroke: none !important;

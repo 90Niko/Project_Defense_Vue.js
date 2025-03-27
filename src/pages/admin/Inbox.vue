@@ -1,6 +1,6 @@
 <script>
+import axiosWebApi from '@/config/axiosWebApi';
 import { useEventBus } from '@/stores/useEventBus';
-import axios from 'axios';
 import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 
 export default {
@@ -10,8 +10,8 @@ export default {
     const selectedSession = ref(null);
     const newMessage = ref('');
     const eventBus = useEventBus();
-    const userEmail = ref('Admin'); // Admin email or identifier
-    let unreadInterval = null; // Store interval reference
+    const userEmail = ref('Admin');
+    let unreadInterval = null;
 
     const scrollToBottom = () => {
       nextTick(() => {
@@ -25,8 +25,8 @@ export default {
     const checkForUnreadMessages = async () => {
       try {
         for (const session of chatSessions.value) {
-          const unreadResponse = await axios.get(
-            `https://myshop0101.azurewebsites.net/api/Chat/userUnRead/${session.userEmail}`,
+          const unreadResponse = await axiosWebApi.get(
+            `/api/Chat/userUnRead/${session.userEmail}`,
           );
           session.hasUnread = unreadResponse.data.unreadCount > 0;
         }
@@ -35,13 +35,12 @@ export default {
         console.error('Error checking unread messages:', error);
       }
     };
-    // Fetch chat sessions
     const fetchChatSessions = async () => {
       loading.value = true;
       try {
-        const response = await axios.get('https://myshop0101.azurewebsites.net/api/Chat/getAllChatSessions');
+        const response = await axiosWebApi.get('/api/Chat/getAllChatSessions');
         chatSessions.value = response.data;
-        await checkForUnreadMessages(); // Check for unread messages
+        await checkForUnreadMessages();
       }
       catch (error) {
         console.error('Error fetching chat sessions:', error);
@@ -51,10 +50,6 @@ export default {
         loading.value = false;
       }
     };
-
-    // Check for unread message
-
-    // Send message to selected session
     const sendMessage = async () => {
       if (!newMessage.value.trim() || !selectedSession.value)
         return;
@@ -66,8 +61,8 @@ export default {
       };
 
       try {
-        const response = await axios.post(
-          'https://myshop0101.azurewebsites.net/api/Chat/sendByCurrentChatSesions',
+        const response = await axiosWebApi.post(
+          '/api/Chat/sendByCurrentChatSesions',
           messagePayload,
           { headers: { 'Content-Type': 'application/json' } },
         );
@@ -79,48 +74,42 @@ export default {
           timestamp: new Date().toISOString(),
         });
 
-        newMessage.value = ''; // Clear input field
-        scrollToBottom(); // Scroll to the latest message
+        newMessage.value = '';
+        scrollToBottom();
       }
       catch (error) {
         console.error('Error sending message:', error);
       }
     };
 
-    // Toggle selected session and mark messages as read
     const toggleSession = async (session) => {
       if (selectedSession.value === session) {
-        selectedSession.value = null; // Close session
+        selectedSession.value = null;
       }
       else {
-        selectedSession.value = session; // Open session
+        selectedSession.value = session;
         try {
-          await axios.get(`https://myshop0101.azurewebsites.net/api/Chat/adminMarkAsRead/${session.userEmail}`);
-          session.hasUnread = false; // Update UI
-          eventBus.emit('messages-read'); // Emit event to update sidebar
+          await axiosWebApi.get(`/api/Chat/adminMarkAsRead/${session.userEmail}`);
+          session.hasUnread = false;
+          eventBus.emit('messages-read');
         }
         catch (error) {
           console.error('Error marking messages as read:', error);
         }
-        scrollToBottom(); // Scroll to the latest message
+        scrollToBottom();
       }
     };
 
-    // Scroll to the bottom of the messages container
-
-    // Format date
     const formatDate = (dateString) => {
       const date = new Date(dateString);
       return date.toLocaleString();
     };
 
-    // Poll for unread messages every 5 seconds
     onMounted(() => {
       fetchChatSessions();
       unreadInterval = setInterval(checkForUnreadMessages, 5000);
     });
 
-    // Clear interval when component unmounts
     onUnmounted(() => {
       if (unreadInterval)
         clearInterval(unreadInterval);
@@ -142,18 +131,12 @@ export default {
 <template>
   <div class="admin-inbox">
     <h1>Admin Inbox</h1>
-
-    <!-- Loading state -->
     <div v-if="loading" class="loading">
       Loading...
     </div>
-
-    <!-- No sessions found message -->
     <div v-else-if="!chatSessions.length" class="no-sessions">
       No chat sessions found.
     </div>
-
-    <!-- Chat sessions -->
     <div v-else class="chat-container">
       <div class="session-list">
         <div
@@ -170,8 +153,6 @@ export default {
           <span class="session-date">{{ formatDate(session.createdAt) }}</span>
         </div>
       </div>
-
-      <!-- Chat window -->
       <div v-if="selectedSession" class="chat-window">
         <div class="messages">
           <div
@@ -188,8 +169,6 @@ export default {
             </p>
           </div>
         </div>
-
-        <!-- New message input -->
         <div class="message-input">
           <textarea
             v-model="newMessage"

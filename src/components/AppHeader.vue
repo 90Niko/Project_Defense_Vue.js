@@ -1,7 +1,7 @@
 <script setup>
+import axiosWebApi from '@/config/axiosWebApi';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCartStore } from '@/stores/useCartStore';
-import axios from 'axios';
 import { Home, Info, Mail, Phone, ShoppingBag, Star } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useToast } from 'vue-toastification';
@@ -9,16 +9,13 @@ import { useToast } from 'vue-toastification';
 const authStore = useAuthStore();
 const toast = useToast();
 
-// Ensure user information is loaded from localStorage on mounted
 onMounted(() => {
-  // Check if there's a stored user in localStorage
   const savedUser = localStorage.getItem('user');
   if (savedUser && !authStore.user) {
-    authStore.setUser(JSON.parse(savedUser)); // Assuming `setUser` is the method to set user data in the store
+    authStore.setUser(JSON.parse(savedUser));
   }
 });
 
-// Links for navigation
 const links = [
   { name: 'home', label: 'Home', icon: Home },
   { name: 'about', label: 'About', icon: Info },
@@ -27,26 +24,21 @@ const links = [
   { name: 'products', label: 'Products', icon: ShoppingBag },
 ];
 
-// Recomputed values for logged-in status, username, and admin status
 const isLoggedIn = computed(() => authStore.isLoggedIn);
 const userName = computed(() => authStore.user?.name || '');
 const isAdmin = computed(() => authStore.user?.role === 'Admin');
-
 const cartStore = useCartStore();
 const cartCount = computed(() => cartStore.totalItems);
-
-// State for tracking unread messages
 const hasNewNotifications = ref(false);
 
-// Check for unread messages
 async function checkUnreadMessages() {
   try {
     if (!isLoggedIn.value || isAdmin.value)
-      return; // Don't check for admins
+      return;
 
     const userEmail = authStore.user?.name;
     if (userEmail) {
-      const response = await axios.get('https://myshop0101.azurewebsites.net/api/Chat/anyIsUnread', {
+      const response = await axiosWebApi.get('/api/Chat/anyIsUnread', {
         params: { userEmail },
       });
       hasNewNotifications.value = response.data;
@@ -57,36 +49,31 @@ async function checkUnreadMessages() {
   }
 }
 
-// Watch login state to check unread messages
 watch(isLoggedIn, (newValue, oldValue) => {
   if (newValue && !oldValue) {
     checkUnreadMessages();
   }
 });
 
-// Check unread messages on mount
 onMounted(() => {
   if (isLoggedIn.value) {
     checkUnreadMessages();
-    setInterval(checkUnreadMessages, 30000); // Check every 30 seconds
+    setInterval(checkUnreadMessages, 30000);
   }
 });
 
-// Handle logout action
 function handleLogout() {
   authStore.logout();
-  localStorage.removeItem('user'); // Remove the user from localStorage on logout
+  localStorage.removeItem('user');
   toast.success('You have been logged out successfully!');
 }
 
 const isDropdownOpen = ref(false);
 
-// Toggle dropdown menu
 function toggleDropdown() {
   isDropdownOpen.value = !isDropdownOpen.value;
 }
 
-// Close dropdown menu
 function closeDropdown() {
   isDropdownOpen.value = false;
 }
@@ -107,23 +94,18 @@ function closeDropdown() {
           {{ link.label }}
         </router-link>
       </li>
-
-      <!-- Show Inbox only for logged-in users who are NOT admins -->
       <li v-if="isLoggedIn && !isAdmin" class="navbar-item inbox-item" @click="closeDropdown">
         <router-link :to="{ name: 'userInbox' }">
           <Mail class="icons" /> Inbox
           <span v-if="hasNewNotifications" class="notification-dot" />
         </router-link>
       </li>
-
-      <!-- Show Admin Area only for Admin users -->
       <li v-if="isAdmin" class="navbar" @click="closeDropdown">
         <router-link :to="{ name: 'AdminDashboard' }">
           Admin Area
         </router-link>
       </li>
     </ul>
-
     <ul class="auth-links">
       <li v-if="isLoggedIn">
         Welcome, {{ userName }}

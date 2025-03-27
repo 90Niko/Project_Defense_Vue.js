@@ -1,5 +1,5 @@
 <script>
-import axios from 'axios';
+import axiosWebApi from '@/config/axiosWebApi';
 import { onMounted, ref } from 'vue';
 
 export default {
@@ -19,7 +19,7 @@ export default {
     // Fetch categories from the API
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('https://myshop0101.azurewebsites.net/api/Category/getAll');
+        const response = await axiosWebApi.get('/api/Category/getAll');
         categories.value = response.data;
       }
       catch (error) {
@@ -50,8 +50,8 @@ export default {
           formData.append('ImageFile', product.value.imageFile);
         }
 
-        const response = await axios.post(
-          'https://myshop0101.azurewebsites.net/api/Product/create',
+        const response = await axiosWebApi.post(
+          '/api/Product/create',
           formData,
           {
             headers: {
@@ -64,7 +64,6 @@ export default {
         errorMessage.value = '';
         console.log('Response:', response.data);
 
-        // Reset form after success
         product.value = {
           name: '',
           price: '',

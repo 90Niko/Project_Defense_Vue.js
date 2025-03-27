@@ -1,25 +1,23 @@
 <script>
-import axios from 'axios';
+import axiosWebApi from '@/config/axiosWebApi';
 import { computed, onMounted, ref } from 'vue';
 
 export default {
   name: 'ManageUsers',
   setup() {
-    const users = ref([]); // Reactive variable to store user data
-    const searchQuery = ref(''); // Reactive variable for the search input
+    const users = ref([]);
+    const searchQuery = ref('');
 
-    // Fetch users from API
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('https://myshop0101.azurewebsites.net/api/User/getAll');
-        users.value = response.data; // Populate the users list
+        const response = await axiosWebApi.get('/api/User/getAll');
+        users.value = response.data;
       }
       catch (error) {
         console.error('Error fetching users:', error);
       }
     };
 
-    // Computed property to filter users based on search query
     const filteredUsers = computed(() => {
       return users.value.filter((user) => {
         const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();

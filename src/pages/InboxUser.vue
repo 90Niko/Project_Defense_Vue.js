@@ -1,6 +1,6 @@
 <script>
+import axiosWebApi from '@/config/axiosWebApi';
 import { useAuthStore } from '@/stores/useAuthStore';
-import axios from 'axios';
 import { nextTick, onMounted, ref } from 'vue';
 
 export default {
@@ -11,11 +11,11 @@ export default {
     const chatSession = ref(null);
     const newMessage = ref('');
     const loading = ref(false);
-    const messagesContainer = ref(null); // Reference to the messages container
+    const messagesContainer = ref(null);
 
     const markAsRead = async () => {
       try {
-        await axios.get(`https://myshop0101.azurewebsites.net/api/Chat/markAsRead?userEmail=${userEmail.value}`);
+        await axiosWebApi.get(`/api/Chat/markAsRead?userEmail=${userEmail.value}`);
       }
       catch (error) {
         console.error('Error marking messages as read:', error);
@@ -31,12 +31,11 @@ export default {
     const fetchChatSession = async () => {
       loading.value = true;
       try {
-        const response = await axios.get(`https://myshop0101.azurewebsites.net/api/Chat/myChatSession/${userEmail.value}`);
+        const response = await axiosWebApi.get(`/api/Chat/myChatSession/${userEmail.value}`);
         console.log('Fetched Chat Session:', response.data);
 
         if (response.data && response.data.id && Array.isArray(response.data.messages)) {
           chatSession.value = response.data;
-          // Scroll to bottom after updating the chat session
           nextTick(() => {
             scrollToBottom();
           });
@@ -58,9 +57,9 @@ export default {
       if (!newMessage.value.trim())
         return;
       try {
-        await axios.get(`https://myshop0101.azurewebsites.net/api/Chat/send?userEmail=${userEmail.value}&message=${encodeURIComponent(newMessage.value)}`);
+        await axiosWebApi.get(`/api/Chat/send?userEmail=${userEmail.value}&message=${encodeURIComponent(newMessage.value)}`);
         newMessage.value = '';
-        fetchChatSession(); // Refresh the chat session
+        fetchChatSession();
       }
       catch (error) {
         console.error('Error sending message:', error);
@@ -78,7 +77,7 @@ export default {
       loading,
       newMessage,
       sendMessage,
-      messagesContainer, // Expose the ref for the template
+      messagesContainer,
     };
   },
 };
@@ -90,19 +89,15 @@ export default {
       <div v-if="loading" class="loading-message">
         Loading...
       </div>
-
       <div v-if="!chatSession" class="no-chat-session">
         <p>No chat session found. Please check if you are logged in and if the data exists.</p>
       </div>
-
       <div v-else>
         <h2 class="chat-header">
           Chat Session
         </h2>
         <p>User Email: {{ chatSession.userEmail }}</p>
         <p>Created At: {{ new Date(chatSession.createdAt).toLocaleString() }}</p>
-
-        <!-- Messages container with ref -->
         <div v-if="chatSession.messages.length > 0" ref="messagesContainer" class="messages-list">
           <ul>
             <li v-for="message in chatSession.messages" :key="message.id" :class="{ 'my-message': message.sender === userEmail, 'other-message': message.sender !== userEmail }">
@@ -136,11 +131,6 @@ export default {
 </template>
 
 <style scoped>
-/* Your existing styles */
-</style>
-
-<style scoped>
-/* General Chat Styling */
 .chat-container {
   display: flex;
   justify-content: center;

@@ -1,7 +1,7 @@
 <script>
+import axiosWebApi from '@/config/axiosWebApi';
 import useVuelidate from '@vuelidate/core';
 import { email, maxLength, minLength, numeric, required } from '@vuelidate/validators';
-import axios from 'axios';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
@@ -64,8 +64,8 @@ export default {
       }
 
       try {
-        const response = await axios.post(
-          'https://myshop0101.azurewebsites.net/api/User/register',
+        const response = await axiosWebApi.post(
+          '/api/User/register',
           {
             firstName: form.value.firstName,
             lastName: form.value.lastName,
@@ -85,7 +85,6 @@ export default {
         submitted.value = true;
         toast.success('Registration successful!');
 
-        // Redirect to home page after 2 seconds
         setTimeout(() => {
           router.push('login');
         }, 2000);
@@ -115,20 +114,13 @@ export default {
 
 <template>
   <div class="registration-container">
-    <!-- Loading Indicator -->
     <div v-if="isLoading" class="loading-indicator" />
-
-    <!-- Success Message -->
     <div v-if="submitted && !submissionError" class="success-message">
       <h3>Form Submitted Successfully!</h3>
     </div>
-
-    <!-- Error Message -->
     <div v-if="submissionError" class="error-message">
       <h3>{{ submissionError }}</h3>
     </div>
-
-    <!-- Profile Icon -->
     <div class="profile-icon-container">
       <img
         class="profile-icon"
@@ -138,10 +130,8 @@ export default {
         alt="Profile"
       >
     </div>
-    <!-- Registration Form -->
     <div class="form-wrapper">
       <form class="form-content" @submit.prevent="submitForm">
-        <!-- First Name -->
         <div class="form-group">
           <label for="firstName" class="form-label">
             <img
@@ -164,8 +154,6 @@ export default {
             {{ v$.firstName.$errors[0]?.$message }}
           </p>
         </div>
-
-        <!-- Last Name -->
         <div class="form-group">
           <label for="lastName" class="form-label">
             <img
@@ -188,8 +176,6 @@ export default {
             {{ v$.lastName.$errors[0]?.$message }}
           </p>
         </div>
-
-        <!-- Email -->
         <div class="form-group">
           <label for="email" class="form-label">
             <img
@@ -212,8 +198,6 @@ export default {
             {{ v$.email.$errors[0]?.$message }}
           </p>
         </div>
-
-        <!-- Password -->
         <div class="form-group">
           <label for="password" class="form-label">
             <img
@@ -236,8 +220,6 @@ export default {
             {{ v$.password.$errors[0]?.$message }}
           </p>
         </div>
-
-        <!-- Age -->
         <div class="form-group">
           <label for="age" class="form-label">
             <img
@@ -260,8 +242,6 @@ export default {
             {{ v$.age.$errors[0]?.$message }}
           </p>
         </div>
-
-        <!-- Gender -->
         <div class="form-group">
           <label for="gender" class="form-label">
             <img
@@ -292,8 +272,6 @@ export default {
             {{ v$.gender.$errors[0]?.$message }}
           </p>
         </div>
-
-        <!-- Submit Button -->
         <button type="submit" class="form-button">
           Submit
         </button>
@@ -303,8 +281,6 @@ export default {
 </template>
 
 <style scoped>
-/* General Styling */
-/* General Styling */
 body {
   font-family: Arial, sans-serif;
   background-color: #f9f9f9;
@@ -314,14 +290,14 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-image: url('https://your-image-url.com'); /* Background image */
+  background-image: url('https://your-image-url.com');
   background-size: cover;
   background-position: center;
 }
 
 .registration-container {
   position: relative;
-  background-color: white; /* Slightly transparent white background */
+  background-color: white;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;

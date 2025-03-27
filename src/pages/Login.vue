@@ -1,5 +1,5 @@
 <script setup>
-import axios from 'axios';
+import axiosWebApi from '@/config/axiosWebApi';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification'; // Import toast
@@ -18,29 +18,24 @@ async function handleLogin() {
   errorMessage.value = null;
 
   try {
-    const response = await axios.post('https://myshop0101.azurewebsites.net/api/auth/login', {
+    const response = await axiosWebApi.post('/api/auth/login', {
       email: username.value,
       password: password.value,
     });
 
     const { token, role } = response.data;
 
-    // Validate role and token
     if (!role || !token) {
       throw new Error('Invalid response from server.');
     }
 
-    // Store token and role in localStorage
     localStorage.setItem('token', token);
     localStorage.setItem('role', role);
 
-    // Set logged-in state in the store
     authStore.setLoggedIn(true, { name: username.value, role });
 
-    // Show success toast
     toast.success('Login successful!');
 
-    // Redirect based on role
     if (role === 'Admin') {
       router.push({ name: 'AdminDashboard' });
     }
@@ -52,7 +47,6 @@ async function handleLogin() {
     console.error('Error during login:', error);
     errorMessage.value = error.response?.data?.message || 'An unexpected error occurred. Please try again.';
 
-    // Show error toast
     toast.error(errorMessage.value);
   }
   finally {
@@ -63,10 +57,7 @@ async function handleLogin() {
 
 <template>
   <div>
-    <!-- Loading indicator -->
     <progress v-if="isLoading" class="loader-line" />
-
-    <!-- Login form -->
     <div class="login-form">
       <h2 class="form-title">
         Login
@@ -228,8 +219,6 @@ button:hover:not(:disabled) {
   text-align: center;
   margin-top: 10px;
 }
-
-/* Responsive Design */
 @media (max-width: 480px) {
   .login-form {
     padding: 20px;

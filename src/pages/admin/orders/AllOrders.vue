@@ -1,5 +1,5 @@
 <script>
-import axios from 'axios';
+import axiosWebApi from '@/config/axiosWebApi';
 
 export default {
   data() {
@@ -8,7 +8,7 @@ export default {
       filteredOrders: [],
       loading: true,
       error: null,
-      searchId: '', // This will hold the search input
+      searchId: '',
     };
   },
   mounted() {
@@ -17,9 +17,9 @@ export default {
   methods: {
     async fetchOrders() {
       try {
-        const response = await axios.get('https://myshop0101.azurewebsites.net/api/Order/getAll');
+        const response = await axiosWebApi.get('/api/Order/getAll');
         this.orders = response.data;
-        this.filteredOrders = this.orders; // Initially show all orders
+        this.filteredOrders = this.orders;
       }
       catch (error) {
         this.error = error.message || 'Error fetching orders';
@@ -29,7 +29,6 @@ export default {
       }
     },
 
-    // Filter orders based on the searchId
     filterOrders() {
       if (this.searchId) {
         this.filteredOrders = this.orders.filter(order =>
@@ -37,11 +36,9 @@ export default {
         );
       }
       else {
-        this.filteredOrders = this.orders; // If searchId is empty, show all orders
+        this.filteredOrders = this.orders;
       }
     },
-
-    // Toggle the visibility of the order details
     toggleDetails(orderId) {
       const order = this.orders.find(order => order.id === orderId);
       if (order) {
@@ -49,19 +46,13 @@ export default {
       }
     },
 
-    // Cancel an order
     async cancelOrder(orderId) {
       try {
-        // Make a request to the API to update the order status to "Cancelled"
-        await axios.put(`https://myshop0101.azurewebsites.net/api/Order/cancel/${orderId}`);
-
-        // Update the order status in the local list after successful cancellation
+        await axiosWebApi.put(`/api/Order/cancel/${orderId}`);
         const order = this.orders.find(order => order.id === orderId);
         if (order) {
           order.status = 'Cancelled';
         }
-
-        // Re-filter the orders if searchId is still present
         this.filterOrders();
       }
       catch (error) {
@@ -69,19 +60,14 @@ export default {
       }
     },
 
-    // Change the order status (e.g., from Pending to Shipped)
     async changeStatus(orderId) {
       try {
-        // Make a request to the API to change the order status
-        await axios.put(`https://myshop0101.azurewebsites.net/api/Order/changeStatus/${orderId}`);
+        await axiosWebApi.put(`/api/Order/changeStatus/${orderId}`);
 
-        // Update the order status in the local list after successful status change
         const order = this.orders.find(order => order.id === orderId);
         if (order) {
-          order.status = 'Shipped'; // Change this to the status you want (e.g., 'Shipped', 'Delivered')
+          order.status = 'Shipped';
         }
-
-        // Re-filter the orders if searchId is still present
         this.filterOrders();
       }
       catch (error) {
@@ -95,8 +81,6 @@ export default {
 <template>
   <div class="order-list">
     <h1>All Orders</h1>
-
-    <!-- Search Input -->
     <div class="search-container">
       <label for="order-id">Search by Order ID:</label>
       <input
@@ -107,7 +91,6 @@ export default {
         @input="filterOrders"
       >
     </div>
-
     <div v-if="loading" class="loading">
       Loading orders...
     </div>
@@ -115,7 +98,6 @@ export default {
       <p>An error occurred while fetching the orders: {{ error }}</p>
     </div>
 
-    <!-- Display Orders -->
     <ul v-if="filteredOrders.length">
       <li v-for="order in filteredOrders" :key="order.id" class="order-item">
         <h2>Order ID: {{ order.id }}</h2>
@@ -123,13 +105,9 @@ export default {
         <p><strong>Status:</strong> {{ order.status }}</p>
         <p><strong>Total Price:</strong> €{{ order.totalPrice }}</p>
         <p><strong>Order Date:</strong> {{ new Date(order.orderDate).toLocaleString() }}</p>
-
-        <!-- Details Button -->
         <button class="details-button" @click="toggleDetails(order.id)">
           {{ order.showDetails ? 'Hide Details' : 'Show Details' }}
         </button>
-
-        <!-- Order Details Section -->
         <div v-if="order.showDetails">
           <ul>
             <li v-for="item in order.orderItems" :key="item.id" class="order-item-detail">
@@ -148,20 +126,14 @@ export default {
             <strong>Phone:</strong> {{ order.customerPhone }}
           </p>
         </div>
-
-        <!-- Cancel Button -->
         <button v-if="order.status !== 'Cancelled'" class="cancel-button" @click="cancelOrder(order.id)">
           Cancel Order
         </button>
-
-        <!-- Change Status Button -->
         <button v-if="order.status !== 'Cancelled'" class="change-status-button" @click="changeStatus(order.id)">
           Change Status
         </button>
       </li>
     </ul>
-
-    <!-- No Orders Found Message -->
     <div v-else class="no-orders">
       <p>No orders found with that ID.</p>
     </div>

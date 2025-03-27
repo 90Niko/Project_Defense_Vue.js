@@ -1,6 +1,6 @@
 <script setup>
+import axiosWebApi from '@/config/axiosWebApi';
 import { useAuthStore } from '@/stores/useAuthStore';
-import axios from 'axios';
 import { onMounted, ref } from 'vue';
 
 const authStore = useAuthStore();
@@ -22,7 +22,7 @@ async function sendMessage() {
   loading.value = true;
 
   try {
-    const response = await axios.get('https://myshop0101.azurewebsites.net/api/Chat/send', {
+    const response = await axiosWebApi.get('/api/Chat/send', {
       params: { userEmail: userEmail.value, message: message.value },
     });
 
@@ -63,7 +63,6 @@ async function sendMessage() {
 </template>
 
 <style scoped>
-/* General Container Styles */
 .container {
   max-width: 600px;
   margin: 40px auto;
@@ -75,7 +74,6 @@ async function sendMessage() {
   transition: all 0.3s ease-in-out;
 }
 
-/* Heading Styles */
 h2 {
   text-align: center;
   font-size: 28px;
@@ -84,12 +82,10 @@ h2 {
   margin-bottom: 24px;
 }
 
-/* Form Group Styling */
 .form-group {
   margin-bottom: 20px;
 }
 
-/* Label Styling */
 label {
   display: block;
   font-size: 16px;
@@ -98,7 +94,6 @@ label {
   margin-bottom: 8px;
 }
 
-/* Textarea Styling */
 textarea {
   width: 100%;
   padding: 14px;
@@ -115,7 +110,6 @@ textarea:focus {
   box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
 }
 
-/* Button Styling */
 button {
   width: 100%;
   padding: 15px;
@@ -139,7 +133,6 @@ button:hover:enabled {
   transform: scale(1.05);
 }
 
-/* Success and Error Message Styling */
 .success {
   color: #28a745;
   font-weight: 600;
@@ -156,7 +149,6 @@ button:hover:enabled {
   font-size: 16px;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .container {
     padding: 25px;

@@ -1,5 +1,5 @@
 <script>
-import axios from 'axios';
+import axiosWebApi from '@/config/axiosWebApi';
 import { inject, onMounted, ref } from 'vue';
 import { useToast } from 'vue-toastification';
 
@@ -7,24 +7,24 @@ export default {
   name: 'AllCategory',
   setup() {
     const categories = ref([]);
-    const $modal = inject('$modal'); // Inject modal if available
-    const toast = useToast(); // Initialize toast
+    const $modal = inject('$modal');
+    const toast = useToast();
 
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('https://myshop0101.azurewebsites.net/api/Category/getAll');
+        const response = await axiosWebApi.get('/api/Category/getAll');
         categories.value = response.data;
       }
       catch (error) {
         console.error('Error fetching categories:', error);
-        toast.error('Failed to load categories. Please try again later.'); // Toast error message
+        toast.error('Failed to load categories. Please try again later.');
       }
     };
 
     const showConfirmDialog = (message) => {
       if (!$modal) {
         return new Promise((resolve) => {
-          const userConfirmed = window.confirm(message); // Fallback to browser confirm
+          const userConfirmed = window.confirm(message);
           resolve(userConfirmed);
         });
       }
@@ -43,13 +43,13 @@ export default {
     const deleteCategory = async (id) => {
       if (await showConfirmDialog('Are you sure you want to delete this category?')) {
         try {
-          await axios.delete(`https://myshop0101.azurewebsites.net/api/Category/${id}`);
+          await axiosWebApi.delete(`/api/Category/${id}`);
           categories.value = categories.value.filter(category => category.id !== id);
-          toast.success('Category deleted successfully!'); // Toast success message
+          toast.success('Category deleted successfully!');
         }
         catch (error) {
           console.error('Error deleting category:', error);
-          toast.error('Failed to delete category. Please try again later.'); // Toast error message
+          toast.error('Failed to delete category. Please try again later.');
         }
       }
     };

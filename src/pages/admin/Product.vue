@@ -22,7 +22,6 @@ export default {
 </template>
 
 <style scoped>
-/* Container */
 .category-container {
   max-width: 800px;
   margin: 0 auto;
@@ -34,7 +33,6 @@ export default {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Title */
 .title {
   font-size: 2rem;
   font-weight: bold;
@@ -42,7 +40,6 @@ export default {
   color: #333;
 }
 
-/* Navigation */
 .navigation {
   display: flex;
   justify-content: center;
@@ -65,7 +62,6 @@ export default {
   background-color: #0056b3;
 }
 
-/* Router View Styling */
 router-view {
   margin-top: 20px;
 }

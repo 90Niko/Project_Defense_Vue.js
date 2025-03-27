@@ -1,17 +1,17 @@
 <script setup>
+import axiosWebApi from '@/config/axiosWebApi';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { useEventBus } from '@/stores/useEventBus'; // Import event bus
-import axios from 'axios';
+import { useEventBus } from '@/stores/useEventBus';
 import { computed, onMounted, ref, watch } from 'vue';
 
 const authStore = useAuthStore();
 const isAdmin = computed(() => authStore.user?.role === 'Admin');
 const unreadMessagesCount = ref(0);
-const eventBus = useEventBus(); // Use global event bus
+const eventBus = useEventBus();
 
 async function fetchUnreadMessages() {
   try {
-    const response = await axios.get('https://myshop0101.azurewebsites.net/api/Chat/unReadMessage');
+    const response = await axiosWebApi.get('/api/Chat/unReadMessage');
     console.log('API Response:', response.data);
 
     if (response.data && typeof response.data.unreadCount === 'number') {
@@ -28,12 +28,10 @@ async function fetchUnreadMessages() {
   }
 }
 
-// Listen for the "messages-read" event and update count
 eventBus.on('messages-read', async () => {
-  await fetchUnreadMessages(); // Update unread count
+  await fetchUnreadMessages();
 });
 
-// Fetch messages when admin logs in
 watch(isAdmin, (newVal) => {
   if (newVal) {
     fetchUnreadMessages();
@@ -61,7 +59,6 @@ onMounted(fetchUnreadMessages);
         <li>
           <router-link to="/admin/inbox">
             Inbox   ({{ unreadMessagesCount }})
-            <!-- Notification dot if there are unread messages -->
             <span v-if="unreadMessagesCount > 0" class="notification-dot" />
           </router-link>
         </li>
@@ -71,17 +68,15 @@ onMounted(fetchUnreadMessages);
 </template>
 
 <style scoped>
-/* Sidebar container */
 .sidebar {
   width: 250px;
   background-color: #2c3e50;
   color: #ecf0f1;
   padding: 20px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  min-height: 100vh; /* Full height */
+  min-height: 100vh;
 }
 
-/* Sidebar heading */
 .sidebar h2 {
   font-size: 1.5rem;
   margin-bottom: 20px;
@@ -89,19 +84,16 @@ onMounted(fetchUnreadMessages);
   text-align: center;
 }
 
-/* Navigation list */
 .sidebar nav ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-/* Navigation list items */
 .sidebar nav ul li {
   margin-bottom: 15px;
 }
 
-/* Router links styling */
 .sidebar nav ul li a {
   color: #ecf0f1;
   text-decoration: none;
@@ -112,18 +104,15 @@ onMounted(fetchUnreadMessages);
   transition: background-color 0.3s ease;
 }
 
-/* Hover effect for links */
 .sidebar nav ul li a:hover {
   background-color: #34495e;
 }
 
-/* Active link styling */
 .sidebar nav ul li a.router-link-active {
   background-color: #1abc9c;
   color: #ffffff;
 }
 
-/* Notification dot */
 .notification-dot {
   display: inline-block;
   width: 10px;
