@@ -12,6 +12,7 @@ import Login from '../pages/Login.vue';
 import NotFound from '../pages/NotFound.vue';
 import Products from '../pages/Products.vue';
 import Register from '../pages/Register.vue';
+import UserProfil from '../pages/UserProfil.vue';
 
 // Navigation Guard for Protected Routes
 import { getCurrentUser, isAuthenticated } from '@/services/authServices';
@@ -29,7 +30,9 @@ const routes = [
   { path: '/products', name: 'products', component: Products },
   { path: '/userInbox', name: 'userInbox', component: InboxUser, meta: { requiresAuth: true } },
   { path: '/address', name: 'address', component: Address, meta: { requiresAuth: true } },
+  { path: '/userProfil', name: 'userProfil', component: UserProfil, meta: { requiresAuth: true } },
   { path: '/unauthorized', name: 'Unauthorized', component: () => import('../pages/Unauthorized.vue') },
+
   { path: '/details/:id', name: 'details', component: Details, meta: { requiresAuth: true } },
 
   // Admin Routes (Properly Structured)

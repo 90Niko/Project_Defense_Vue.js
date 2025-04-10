@@ -1,52 +1,43 @@
 <script>
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useFavoriteStore } from '@/stores/useFavoriteStore';
-import { useRouter } from 'vue-router'; // Import router for navigation
+import { useRouter } from 'vue-router';
 
 export default {
   name: 'FavoritesList',
   setup() {
     const favoriteStore = useFavoriteStore();
     const authStore = useAuthStore();
-    const router = useRouter(); // Access the router
-
-    // Reactive favorites array
+    const router = useRouter();
     const favorites = favoriteStore.favorites;
-
-    // Redirect to Login page
     const redirectToLogin = () => {
-      router.push('/login'); // Navigate to Login.vue
+      router.push('/login');
     };
-
-    // Remove a product from the favorites list
     const removeFavorite = (product) => {
-      favoriteStore.removeFavorite(product); // Update the store
+      favoriteStore.removeFavorite(product);
       const index = favorites.findIndex(item => item.id === product.id);
       if (index !== -1) {
-        favorites.splice(index, 1); // Remove the product from the local array
+        favorites.splice(index, 1);
       }
     };
 
     const getImageUrl = (imagePath) => {
       if (!imagePath)
-        return '/default-product.png'; // ✅ Fallback image
-
-      // ✅ Ensure full image URL
-      return imagePath.startsWith('http') ? imagePath : `https://myshop0101.azurewebsites.net/${imagePath}`;
+        return '/default-product.png';
+      return imagePath.startsWith('http') ? imagePath : `http://localhost:5084/${imagePath}`;
     };
 
-    // Reset the isRemoved flag to false to "restore" the product
     const resetRemovedFlag = () => {
       favoriteStore.isRemoved = false;
     };
 
     return {
-      favorites, // Reactive array
-      removeFavorite, // Method to remove a product
-      resetRemovedFlag, // Method to reset removal state
-      isLoggedIn: authStore.isLoggedIn, // Reactive property for login status
+      favorites,
+      removeFavorite,
+      resetRemovedFlag,
+      isLoggedIn: authStore.isLoggedIn,
       redirectToLogin,
-      getImageUrl, // Method to redirect to Login
+      getImageUrl,
     };
   },
 };
@@ -55,14 +46,12 @@ export default {
 <template>
   <div>
     <h1>Your Favorites</h1>
-    <!-- Show message and login button if the user is not logged in -->
     <div v-if="!isLoggedIn" class="login-prompt">
       <p>You must log in to view the favorite.</p>
       <button class="login-button" @click="redirectToLogin">
         Log In
       </button>
     </div>
-    <!-- Display favorite items if the user is logged in and the list is not empty -->
     <ul v-if="isLoggedIn && favorites.length > 0" class="favorite-list">
       <li v-for="product in favorites" :key="product.id" class="favorite-item">
         <div class="favorite-product">
@@ -72,13 +61,11 @@ export default {
             <p>$ {{ product.price }}</p>
           </div>
         </div>
-        <!-- Remove Button -->
         <button class="remove-button" @click="removeFavorite(product)">
           Remove
         </button>
       </li>
     </ul>
-    <!-- Show a message if there are no favorites -->
     <p v-else-if="isLoggedIn">
       No favorites added yet!
     </p>
@@ -86,7 +73,6 @@ export default {
 </template>
 
 <style>
-/* Global Styling */
 body {
   font-family: 'Arial', sans-serif;
   margin: 0;
@@ -109,8 +95,6 @@ p {
   font-size: 1rem;
   color: #666;
 }
-
-/* Login Prompt Styling */
 .login-prompt {
   text-align: center;
   padding: 20px;
@@ -144,7 +128,6 @@ p {
   transform: scale(1.05);
 }
 
-/* Favorites List Styling */
 .favorite-list {
   list-style: none;
   padding: 0;
@@ -217,14 +200,12 @@ p {
   transform: scale(1.05);
 }
 
-/* Empty Favorites Message */
 p {
   margin-top: 20px;
   font-size: 1.1rem;
   color: #999;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .favorite-list {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));

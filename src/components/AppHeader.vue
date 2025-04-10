@@ -108,7 +108,12 @@ function closeDropdown() {
     </ul>
     <ul class="auth-links">
       <li v-if="isLoggedIn">
-        Welcome, {{ userName }}
+        <router-link :to="{ name: 'userProfil' }">
+          <button class="userProfil">
+            Welcome, {{ userName }}
+          </button>
+        </router-link>
+        <span class="tooltip">My Profile</span>
       </li>
       <li v-if="isLoggedIn">
         <router-link :to="{ name: 'cart' }">
@@ -273,6 +278,17 @@ nav {
   align-items: center;
   justify-content: space-between;
   width: 100%;
+}
+.userProfil {
+  background-color: #333;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+.userProfil:hover {
+  background-color: #555;
+  color: #f8b400;
 }
 
 /* Mobile responsiveness */

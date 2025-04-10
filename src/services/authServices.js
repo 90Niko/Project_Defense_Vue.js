@@ -6,7 +6,6 @@ export async function login(email, password) {
     const response = await api.post('/auth/login', { email, password });
     const { token, role } = response.data;
 
-    // Store the token in localStorage
     localStorage.setItem('token', token);
     localStorage.setItem('userRole', role);
     return response.data;
@@ -17,25 +16,25 @@ export async function login(email, password) {
 }
 
 export async function isAuthenticated() {
-  return !!localStorage.getItem('token'); // Check if token exists
+  return !!localStorage.getItem('token');
 }
 
 export function logout() {
   localStorage.removeItem('token');
-  localStorage.removeItem('userRole'); // Optionally remove the userRole as well
+  localStorage.removeItem('userRole');
   router.push({ name: 'home' });
 }
 
 export async function getCurrentUser() {
   try {
-    const token = localStorage.getItem('token'); // Retrieve token from localStorage
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No token found, user is not authenticated');
     }
 
     const response = await api.get('/auth/user', {
       headers: {
-        Authorization: `Bearer ${token}`, // Pass token in Authorization header
+        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;

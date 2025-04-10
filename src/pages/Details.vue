@@ -16,10 +16,10 @@ export default {
     const getImageUrl = (imagePath) => {
       if (!imagePath)
         return '/default-product.png';
-      // Ensure a full URL is provided if needed
+
       return imagePath.startsWith('http')
         ? imagePath
-        : `https://myshop0101.azurewebsites.net/${imagePath}`;
+        : `http://localhost:5084/${imagePath}`;
     };
 
     return {
@@ -75,7 +75,6 @@ export default {
 </template>
 
 <style scoped>
-/* CSS Variables for theme customization */
 :root {
   --primary-color: #5A67D8;
   --primary-color-hover: #434190;
@@ -87,7 +86,6 @@ export default {
   --font-family: 'Roboto', sans-serif;
 }
 
-/* Card Container */
 .cart-container {
   max-width: 750px;
   margin: 40px auto;
@@ -104,7 +102,6 @@ export default {
   transform: translateY(-5px);
 }
 
-/* Header */
 .cart-header {
   text-align: center;
   margin-bottom: 30px;
@@ -118,7 +115,6 @@ export default {
   margin: 0;
 }
 
-/* Content Layout */
 .cart-content {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
@@ -147,7 +143,6 @@ export default {
   transition: transform 0.3s ease;
 }
 
-/* Details Section */
 .cart-details {
   display: flex;
   flex-direction: column;
@@ -185,7 +180,6 @@ export default {
   font-size: 1.1rem;
 }
 
-/* Button Styling */
 .cart-done-button {
   background-color: var(--primary-color);
   color: #fff;
@@ -204,7 +198,6 @@ export default {
   transform: translateY(-3px);
 }
 
-/* Fallback message */
 .cart-product-not-found {
   text-align: center;
   font-size: 1.2rem;
@@ -212,7 +205,6 @@ export default {
   margin-top: 40px;
 }
 
-/* Responsive Adjustments */
 @media (max-width: 768px) {
   .cart-content {
     display: flex;
